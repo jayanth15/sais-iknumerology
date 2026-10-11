@@ -1,1 +1,1 @@
-be6678bb3475ee3b50a8f259b6781b49ea0c34213e2347ea9221c5400eacdac6  name-suggestion.jar
+8a400ef2028518d7f88a4df21daa27200fb04d83c8524cfd4f3a5e11b7332a40  name-suggestion.jar

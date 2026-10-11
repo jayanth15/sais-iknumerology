@@ -1,6 +1,6 @@
 # IK's Numerology — Docker (Java 17)
 
-Includes the application executable JAR, the modern date picker and the branded customer PDF.
+Includes the executable JAR, modern date picker, branded customer PDF and 500-name Sarvam acceleration.
 
 **Requirements:** Docker Desktop / Docker Engine, and a valid **Sarvam AI API key**. Docker downloads an Eclipse Temurin **Java 17 JRE** image the first time you build. No JDK or Maven installation is required on your PC.
 
@@ -71,3 +71,32 @@ docker rm -f iks-numerology        # Delete container (not its data volume)
 **Key changes:** To rotate the key for `docker run`, remove the container without deleting the data volume, then run the `docker run` command again with the new key. `docker start` retains the key passed when the original container was created. For Compose, set the new `SARVAM_API_KEY` and run `docker compose up -d --force-recreate`.
 
 **Optional:** The entrypoint forwards arguments after the image name to Spring Boot, e.g. `--sarvam.max-batches=50`; do not pass the API key on the command line because it can show up in process listings.
+
+## 500-name generation speed
+
+The current build requests up to 50 names in parallel from Sarvam using 14
+workers, with a default **28-second API time budget**. Valid responses (and
+meanings) are written to `/app/data/names.mv.db` in the existing Docker
+volume. The database stores **only actual Sarvam responses**: there is no
+preloaded catalogue, no generated placeholders, and no guarantee a narrow
+starting pattern contains 500 genuine names. Later identical searches can
+load cached Sarvam data quickly without using further API calls.
+
+Optional startup configuration:
+
+```powershell
+# Set these before docker compose up; the API key still comes separately.
+$env:SARVAM_PARALLELISM = "14"
+$env:SARVAM_MAX_SECONDS = "28"
+$env:SARVAM_MAX_BATCHES = "36"
+```
+
+**Docker Compose:** The included compose.yaml passes these options if set.
+For Docker Run, pass `-e SARVAM_PARALLELISM=14 -e SARVAM_MAX_SECONDS=28`.
+Keep your existing named Docker volume during upgrades; cached names and
+registered accounts will survive container replacement.
+
+**Timing limitation:** The application will return partial results at its
+configured deadline instead of fabricating 500 names. The 30-second target
+is a response-budget design goal, not a Sarvam API service-level guarantee.
+Actual provider speed/quota can prevent 500 unique names on the first request.

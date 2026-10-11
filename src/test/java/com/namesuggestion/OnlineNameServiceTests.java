@@ -46,13 +46,13 @@ class OnlineNameServiceTests {
   server.expect(requestTo(OnlineNameService.ENDPOINT)).andExpect(jsonPath("$.messages[1].content").value(org.hamcrest.Matchers.allOf(org.hamcrest.Matchers.containsString("Return 2 distinct suitable names"),org.hamcrest.Matchers.containsString("Paul, Peter")))).andRespond(withSuccess(continuation,MediaType.APPLICATION_JSON));
   var result=service(b.build(),"test-key",10).find("English","Male","P",4);
   assertEquals(List.of("Paul","Peter","Philip","Patrick"),result.names().stream().map(OnlineNameService.OnlineName::name).toList());
-  assertTrue(result.message().contains("cut off a batch"));assertTrue(result.message().contains("2 API call(s)"));server.verify();
+  assertTrue(result.message().contains("cut off a batch"));assertTrue(result.message().contains("2 API calls started"));server.verify();
  }
  @Test void duplicateOnlyBatchesStopAndExcludePreviousNames()throws Exception{
   var b=RestClient.builder();var server=MockRestServiceServer.bindTo(b).build();
   server.expect(requestTo(OnlineNameService.ENDPOINT)).andRespond(withSuccess(response("Peter"),MediaType.APPLICATION_JSON));
   for(int i=0;i<10;i++)server.expect(requestTo(OnlineNameService.ENDPOINT)).andExpect(jsonPath("$.messages[1].content").value(org.hamcrest.Matchers.containsString("Do not repeat these already returned names: Peter"))).andRespond(withSuccess(response("Peter"),MediaType.APPLICATION_JSON));
-  var result=service(b.build(),"test",100).find("English","Male","P",10000);assertEquals(1,result.names().size());assertTrue(result.message().contains("11 API call(s)"));server.verify();
+  var result=service(b.build(),"test",100).find("English","Male","P",10000);assertEquals(1,result.names().size());assertTrue(result.message().contains("11 API calls started"));server.verify();
  }
  @Test void invalidFiltersDoNotCallProvider(){var s=service(RestClient.create(),"test",1);assertThrows(IllegalArgumentException.class,()->s.find("Unknown","Male","P",10));assertThrows(IllegalArgumentException.class,()->s.find("Tamil","Male","P",10001));}
  @Test void authenticationFailureIsActionableAndDoesNotExposeResponse(){var b=RestClient.builder();var server=MockRestServiceServer.bindTo(b).build();server.expect(requestTo(OnlineNameService.ENDPOINT)).andRespond(withStatus(HttpStatus.UNAUTHORIZED).body("test-key"));var r=service(b.build(),"test-key",10).find("Tamil","Male","P",100);assertTrue(r.names().isEmpty());assertTrue(r.message().contains("rejected the key"));assertFalse(r.message().contains("test-key"));server.verify();}

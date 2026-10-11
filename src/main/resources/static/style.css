@@ -41,3 +41,6 @@
 .dob-today:hover {background:#d5e9d9}
 @media (max-width:700px) {.dob-popover {width:min(350px,calc(100vw - 70px));padding:14px} .dob-days .dob-day,.dob-day-placeholder {height:41px}}
 @media (prefers-reduced-motion:reduce) {.dob-popover {animation:none}}
+
+#generationBusy[hidden]{display:none!important}
+#generateSubmit:disabled{opacity:.72;cursor:wait}

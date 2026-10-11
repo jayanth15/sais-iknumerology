@@ -1,8 +1,10 @@
 # Name Garden — Sarvam AI edition
 
 Java 17+, Spring Boot and Thymeleaf. Sarvam replaces Wikidata entirely.
-Every submitted search generates fresh names through Sarvam. No local name
-catalogue or model-result cache is used.
+All suggestions come from Sarvam API completions. The application now persists
+Sarvam-provided names and meanings in the existing H2 database and reuses them
+for later searches with the same language, gender and prefix. No local prefilled
+name catalogue or fabricated fallback names are used.
 
 ## Run on Windows (PowerShell)
 
@@ -61,15 +63,20 @@ native date input remains available. No third-party CDN is needed.
   not independently verified facts. The app asks the model not to invent names.
 - The form requests 1–500 candidates BEFORE the pyramid-number filter. Default
   is 100. Requests above 500 are rejected by server-side validation.
-- Requests 25 names per batch; maximum 250 API calls per search by default.
-  Cut-off or malformed batches trigger smaller follow-up batches, and complete
-  name objects are recovered. Up to ten consecutive calls with no new names are
-  allowed before stopping.
-- Default time budget: 900 seconds before starting another batch; configure any
-  load balancer or reverse-proxy timeout to exceed this. Completed batches are
-  returned on failure, time limit, rate limit or exhausted name variety. Sarvam
-  output cannot be guaranteed; it depends on the filters, account quota, response
-  quality and available established names.
+- For searches of 100–500 candidates, up to 14 Sarvam requests run concurrently,
+  each requesting up to 50 names. Independent prompts encourage different groups
+  of established names, and responses are deduplicated case-insensitively.
+- The default generation budget is 28 seconds (configured to return the request
+  in approximately 30 seconds including server overhead); HTTP connection and
+  read timeouts are 3 and 24 seconds respectively. The time budget and call count
+  are hard stops, not guarantees of 500 matching names.
+- All completed, valid Sarvam names and meanings are saved to H2, even when an
+  individual response is truncated or more names than the current target arrive.
+  The same language/gender/prefix can reuse saved names instantly. A shorter or
+  different prefix may still need fresh API requests.
+- An initial short search or cache miss can return fewer names on strict prefixes,
+  account rate limits, API failures or duplicate responses. No names are invented
+  to reach 500. Retrying can supplement the saved Sarvam names with fresh batches.
 - One generation runs at a time per application instance to limit accidental
   overlapping calls. A second request gets a visible busy message.
 - Only language, gender, prefix, batch size and names already generated during that
@@ -81,9 +88,10 @@ Start with the default 100 candidates to check your key and output quality.
 You can increase the request up to 500, but larger generations may take longer
 and incur additional Sarvam API charges. The price
 charged is controlled by Sarvam and your account plan; this application is no
-longer key-free or guaranteed free. Repeated searches make fresh paid API calls.
-For long requests behind an AWS load balancer/reverse proxy, configure its timeout
-to exceed the generation budget plus the final request, or lower the budget/count.
+longer key-free or guaranteed free. Cached repeats do not generate more API calls when the saved Sarvam results cover
+the requested count. A cache miss may make paid requests. For reverse proxies, set
+the request timeout above 30 seconds. Performance depends on actual Sarvam latency
+and account rate limits; a cold 500-name request is not guaranteed in 30 seconds.
 
 ## Configuration
 
@@ -91,8 +99,9 @@ to exceed the generation budget plus the final request, or lower the budget/coun
 |---|---|---|
 | SARVAM_API_KEY | empty | Server-side subscription key; blank produces a setup message |
 | SARVAM_MODEL | sarvam-105b | V1-compatible chat model |
-| SARVAM_MAX_BATCHES | 250 | Call limit per search, clamped to 1–500 |
-| SARVAM_MAX_SECONDS | 900 | Generation time budget, clamped to 1–1800 seconds |
+| SARVAM_MAX_BATCHES | 36 | Call limit per search, clamped to 1–100 |
+| SARVAM_MAX_SECONDS | 28 | API generation time budget, clamped to 1–30 seconds |
+| SARVAM_PARALLELISM | 14 | Concurrent Sarvam requests for large searches, clamped to 1–16 |
 | PORT | 8080 | HTTP port |
 | BIND_ADDRESS | 127.0.0.1 | Bind address; use 0.0.0.0 when hosting |
 | APP_DATA | ./data | H2 account database directory |
