@@ -1,0 +1,43 @@
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#203c36;background:#f4f7f3;line-height:1.55}*{box-sizing:border-box}body{margin:0}header{background:#123f36;color:white;padding:18px max(24px,calc((100vw - 1120px)/2));display:flex;align-items:center;gap:28px;flex-wrap:wrap}header strong{font-size:23px;margin-right:auto}header a{color:white}header form{margin:0}main{max-width:1120px;margin:34px auto;padding:0 24px}h1{font-size:34px;letter-spacing:-1px;margin:6px 0}h2{font-size:22px}.eyebrow{color:#647c71;text-transform:uppercase;letter-spacing:2px;font-size:12px;font-weight:700}.intro{max-width:760px;color:#557166}.card{background:white;border:1px solid #dce5dc;border-radius:16px;padding:26px;margin:24px 0;box-shadow:0 8px 30px #123f3605}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}label{font-size:14px;font-weight:650;display:block}input,select{display:block;width:100%;padding:12px;border:1px solid #b9cbbd;border-radius:8px;margin-top:7px;font:inherit;color:inherit;background:white}input:focus,select:focus{outline:3px solid #cae5d5}button,.button{display:inline-block;padding:11px 18px;background:#145c48;color:white;border:0;border-radius:8px;font:inherit;cursor:pointer;text-decoration:none}button.secondary,.button.secondary{background:#e6f1e9;color:#164e3c}form .actions{margin-top:24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}.muted,small{color:#667b70}.error{background:#fff0ec;border-left:4px solid #b6482d;padding:14px}.notice{background:#eaf3eb;padding:14px;border-radius:8px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:14px 12px;border-bottom:1px solid #e3e9e1;font-size:14px}th{background:#f2f6ef}td strong{font-size:16px}.badge{display:inline-block;border-radius:24px;background:#edf3d5;padding:4px 12px;font-weight:750}.auth{max-width:460px;margin:70px auto}.auth label{margin:18px 0}.pyramid{overflow:auto;white-space:nowrap;font-family:monospace;text-align:center}.pyramid .row{min-width:max-content;display:flex;justify-content:center;gap:8px;margin:5px}.cell{display:inline-block;width:24px;border-radius:4px;background:#edf4eb}.big-number{font-size:48px;font-weight:750;color:#145c48}a{color:#145c48}footer{color:#698072;font-size:12px;margin:32px 0}summary{cursor:pointer} @media(max-width:700px){.grid{grid-template-columns:1fr}.card{padding:18px}header{gap:14px}h1{font-size:28px}}
+
+/* Date of birth - modern offline calendar with instant month and year navigation. */
+.dob-field {min-width:0}
+.dob-picker {position:relative}
+.dob-enhanced[hidden], .dob-popover[hidden] {display:none!important}
+.dob-input-row {position:relative;margin-top:7px}
+.dob-input-row .dob-text {margin-top:0;padding:12px 54px 12px 14px;letter-spacing:.045em;font-variant-numeric:tabular-nums;border-radius:11px;min-height:49px;background:linear-gradient(180deg,#fff,#fcfefd)}
+.dob-input-row .dob-text:focus {border-color:#278667;box-shadow:0 0 0 3px #e2f1e8;outline:none}
+.dob-input-row .dob-text.dob-invalid {border-color:#b6482d;box-shadow:0 0 0 3px #fff0ec}
+.dob-trigger {position:absolute;right:5px;top:5px;height:39px;width:42px;display:grid;place-items:center;padding:0;border-radius:9px;background:#e7f3ec;color:#145c48;transition:background .15s ease}
+.dob-trigger:hover,.dob-trigger[aria-expanded="true"] {background:#d0e8d9}
+.dob-help {display:block;margin-top:7px;font-size:12px;line-height:1.45}
+.dob-popover {position:absolute;left:0;top:calc(100% + 10px);width:min(350px,calc(100vw - 48px));z-index:25;padding:17px;background:#fff;border:1px solid #d8e6dd;border-radius:18px;box-shadow:0 25px 65px #163d3430,0 4px 12px #173e2c12;color:#1a3b32;animation:dob-appear .14s ease-out;}
+@keyframes dob-appear {from {opacity:.65;transform:translateY(-4px)}to {opacity:1;transform:translateY(0)}}
+.dob-popover-title {display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:15px;font-weight:750;margin:0 0 14px}
+.dob-close {width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:#f1f5f1;color:#547064;padding:0;font-size:22px;line-height:1}
+.dob-close:hover {background:#e2ede5}
+.dob-quick-jump {display:grid;grid-template-columns:1fr 110px;gap:10px;padding:12px;background:#f1f7f2;border:1px solid #e2ede4;border-radius:12px}
+.dob-select-group {font-size:11px;color:#557365;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.dob-select-group select {margin-top:5px;padding:9px 29px 9px 10px;border-color:#cbded0;background:white;border-radius:8px;font-size:14px;min-height:38px;color:#1b4837;cursor:pointer}
+.dob-month-navigation {display:flex;justify-content:space-between;align-items:center;gap:10px;padding:15px 2px 10px}
+.dob-month-title {font-size:14px;font-weight:750}
+.dob-prev,.dob-next {display:grid;place-items:center;width:31px;height:31px;background:#f1f6f2;color:#235b47;border-radius:9px;padding:0;font-size:23px}
+.dob-prev:hover:not(:disabled),.dob-next:hover:not(:disabled) {background:#dceee2}
+.dob-prev:disabled,.dob-next:disabled {cursor:not-allowed;opacity:.3}
+.dob-weekdays,.dob-days {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}
+.dob-weekdays {font-size:11px;font-weight:700;color:#82988b;margin:4px 0 8px}
+.dob-days .dob-day,.dob-day-placeholder {display:grid;place-items:center;min-width:0;width:100%;height:38px;border-radius:10px}
+.dob-days .dob-day {font-size:13px;background:transparent;color:#29483c;padding:0;font-weight:600}
+.dob-days .dob-day:hover:not(:disabled) {background:#e3f2e8}
+.dob-days .dob-day.is-selected {background:#166246;color:white;box-shadow:0 3px 8px #16624630}
+.dob-days .dob-day.is-today:not(.is-selected) {box-shadow:inset 0 0 0 1px #a57d36;color:#886428}
+.dob-days .dob-day:disabled {color:#c0cec5;opacity:.65;cursor:not-allowed}
+.dob-popover button:focus-visible,.dob-popover select:focus-visible,.dob-trigger:focus-visible {outline:3px solid #78b89c;outline-offset:2px}
+.dob-popover-footer {display:flex;justify-content:space-between;border-top:1px solid #e8eee9;margin-top:12px;padding-top:13px}
+.dob-clear,.dob-today {padding:7px 13px;font-size:13px;font-weight:700}
+.dob-clear {background:transparent;color:#667d70}
+.dob-clear:hover {background:#eef4ed}
+.dob-today {background:#e7f3e9;color:#16583e}
+.dob-today:hover {background:#d5e9d9}
+@media (max-width:700px) {.dob-popover {width:min(350px,calc(100vw - 70px));padding:14px} .dob-days .dob-day,.dob-day-placeholder {height:41px}}
+@media (prefers-reduced-motion:reduce) {.dob-popover {animation:none}}

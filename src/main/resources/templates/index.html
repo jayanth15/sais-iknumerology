@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="en" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Name Garden · Suggestions</title><link rel="stylesheet" th:href="@{/style.css}"><script defer th:src="@{/date-picker.js}"></script></head><body>
+<header th:replace="~{fragments :: nav}"></header><main><div class="eyebrow">A name with meaning</div><h1>Find a name that fits.</h1><p class="intro">Generate language-based names with Sarvam AI, then match your preferred pyramid number. Every search contacts Sarvam; no names are loaded from a local catalogue.</p>
+<div class="error" role="alert" th:if="${error}" th:text="${error}"></div>
+<form class="card" method="post" th:action="@{/suggestions}" th:object="${form}"><div class="grid">
+<div class="dob-field">
+<label for="dateOfBirth">Date of birth</label>
+<div class="dob-picker" data-dob-picker>
+  <input type="date" class="dob-native" th:field="*{dateOfBirth}" required aria-describedby="dobHint">
+  <div class="dob-enhanced" hidden>
+    <div class="dob-input-row">
+      <input class="dob-text" type="text" id="dobReadable" inputmode="numeric" autocomplete="bday" placeholder="DD / MM / YYYY" maxlength="10" required aria-label="Date of birth (day, month, year)" aria-describedby="dobHint">
+      <button type="button" class="dob-trigger" aria-label="Open date of birth calendar" aria-expanded="false" aria-haspopup="dialog" title="Choose date from calendar">
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/><path d="M8 14h2v2H8zM14 14h2v2h-2z"/></svg>
+      </button>
+    </div>
+    <div class="dob-popover" role="dialog" aria-label="Select date of birth" hidden>
+      <div class="dob-popover-title"><span>Choose your birth date</span><button type="button" class="dob-close" aria-label="Close calendar">&#215;</button></div>
+      <div class="dob-quick-jump">
+        <label class="dob-select-group">Month<select class="dob-month" aria-label="Choose month"></select></label>
+        <label class="dob-select-group">Year<select class="dob-year" aria-label="Choose birth year"></select></label>
+      </div>
+      <div class="dob-month-navigation">
+        <button type="button" class="dob-prev" aria-label="Previous month">&#8249;</button>
+        <span class="dob-month-title" aria-live="polite"></span>
+        <button type="button" class="dob-next" aria-label="Next month">&#8250;</button>
+      </div>
+      <div class="dob-weekdays" aria-hidden="true"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+      <div class="dob-days" role="grid" aria-label="Days of selected month"></div>
+      <div class="dob-popover-footer"><button type="button" class="dob-clear">Clear</button><button type="button" class="dob-today">Today</button></div>
+    </div>
+  </div>
+</div>
+<small id="dobHint" class="dob-help">Choose month and year instantly, or type DD/MM/YYYY. For report information only.</small>
+</div>
+<label>Starting letters<input th:field="*{startLetter}" placeholder="P, Pra, Ka…" maxlength="30" pattern="[A-Za-z]+" required></label>
+<label>Surname / initials<input th:field="*{surname}" placeholder="Saikiran Kamali" maxlength="80" required></label>
+<label>Language / usage<select th:field="*{language}"><option th:each="v:${languages}" th:value="${v}" th:text="${v}"></option></select></label>
+<label>Gender<select th:field="*{gender}"><option th:each="v:${genders}" th:value="${v}" th:text="${v}"></option></select></label>
+<label>Final number<select th:field="*{finalNumber}"><option value="">Any number</option><option th:each="n:${#numbers.sequence(1,9)}" th:value="${n}" th:text="${n}"></option></select></label>
+<label>Name order<select th:field="*{surnameFirst}"><option value="false">Given name + surname</option><option value="true">Surname + given name</option></select></label>
+<label>Candidate names before number filtering<input type="number" th:field="*{candidateCount}" min="1" max="500" required><small>Enter between 1 and 500 candidates (default: 100). Requests are made in batches of 25; Sarvam may return fewer names depending on the filters and available variety.</small></label><div class="notice"><strong>Sarvam AI generation.</strong> Language, gender, starting letters and previously generated first names are sent. Generating may take several minutes; time limits or limited name variety may produce fewer candidates.</div></div><div class="actions"><button type="submit">Find names →</button><a th:href="@{/}">Reset</a></div></form>
+<p class="muted">Use English spellings for the original A–Z mapping. Given name and surname are shown with a space between them; that space counts as zero in the pyramid. Neutral searches return entries tagged Neutral.</p>
+<section class="card" th:if="${results != null}"><p class="notice" th:text="${sourceMessage}"></p><div class="actions"><h2><span th:text="${#lists.size(results)}"></span> matching names</h2><a class="button secondary" th:href="@{/export/user-pdf}">Download User PDF</a><a class="button secondary" th:href="@{/export/customer-pdf}">Download Customer PDF</a></div>
+<div th:if="${#lists.isEmpty(results)}" class="notice">No generated candidates matched all filters. Try a shorter prefix or “Any number”, or try again later if Sarvam is temporarily unavailable. AI suggestions require review.</div>
+<div class="table-wrap" th:unless="${#lists.isEmpty(results)}"><table><thead><tr><th>Name</th><th>Meaning</th><th>Origin / usage</th><th>Final number</th></tr></thead><tbody><tr th:each="r:${results}"><td><strong th:text="${r.combinedName}"></strong><br><small>Given name: <span th:text="${r.name}"></span></small></td><td th:text="${r.meaning}"></td><td><span th:text="${r.origin}"></span><br><a th:if="${!#strings.isEmpty(r.sourceUrl)}" th:href="${r.sourceUrl}" target="_blank" rel="noopener noreferrer">View source ↗</a></td><td><span class="badge" th:text="${r.finalNumber}"></span></td></tr></tbody></table></div></section>
+<details class="card"><summary>How Sarvam generation works</summary><p>Sarvam is prompted for established names used in the selected language, conventional English spellings, and short meanings. The app checks the returned language/gender labels and prefix, removes duplicates, and calculates the pyramid number in Java. These labels and meanings are generated by AI and should be checked before choosing a name.</p><p>Requests run in batches of 25. Cut-off or malformed responses trigger smaller follow-up batches, and complete name objects are retained. Generation stops at the target, the call/time limit, an error, or ten consecutive calls without new names. The default time budget is 15 minutes. Sarvam output varies by language, gender, prefix and account quota. The final number filter reduces the candidate list further.</p></details>
+<footer th:replace="~{fragments :: footer}"></footer></main></body></html>

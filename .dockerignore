@@ -1,0 +1,5 @@
+# Only the runtime files are needed: never send secret files into the build context.
+**
+!Dockerfile
+!docker-entrypoint.sh
+!name-suggestion.jar
