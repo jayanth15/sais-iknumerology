@@ -1,5 +1,14 @@
-# Only the runtime files are needed: never send secret files into the build context.
-**
-!Dockerfile
-!docker-entrypoint.sh
-!name-suggestion.jar
+# Keep local-only files out of the Docker / Nixpacks build context:
+# repository metadata, IDE files, local secrets, H2 data and build output.
+# Everything else (pom.xml, src/, nixpacks.toml, ...) must stay IN the context:
+# Nixpacks builds the Maven project from source.
+.git
+.gitignore
+.idea
+target
+data
+*.log
+.env
+.env.*
+/name-suggestion.jar
+/extra-names.tsv

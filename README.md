@@ -152,3 +152,14 @@ https://docs.sarvam.ai/api-reference/authentication
 
 A Dockerfile, Docker Compose configuration, startup script and detailed Windows/Linux instructions are included. **See [DOCKER_README.md](DOCKER_README.md)**. Pass your Sarvam key at runtime using `SARVAM_API_KEY` (never bake it into the image).
 
+## Dokploy (Nixpacks build)
+
+This repository builds as-is with Nixpacks (Java/Maven provider, JDK 17). The included `nixpacks.toml` pins the same runtime defaults as the Dockerfile (`BIND_ADDRESS=0.0.0.0`, `PORT=8080`, `APP_DATA=/app/data`) and starts `target/name-suggestion.jar`.
+
+In Dokploy:
+
+1. Set the application **Build Type** to **Nixpacks** (no base directory; the repo root is the app root).
+2. Add environment variable `SARVAM_API_KEY` (never commit the key).
+3. Set the application/domain port to **8080**.
+4. Mount a volume at **/app/data** to keep the H2 user database across redeploys.
+
