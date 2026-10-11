@@ -1,0 +1,15 @@
+# Nixpacks build plan (used automatically by Dokploy when Build Type = Nixpacks).
+#
+# The Java/Maven provider detects pom.xml and builds with JDK 17 (Nixpacks default):
+#   mvn -DoutputFile=target/mvn-dependency-list.log -B -DskipTests clean dependency:list install
+# and then starts the Spring Boot fat JAR named by the project's finalName (name-suggestion).
+
+[variables]
+# Baked into the image as defaults; Dokploy environment variables override them at runtime.
+# Same values the Dockerfile sets: reachable through the platform proxy, data on a mountable path.
+BIND_ADDRESS = "0.0.0.0"
+PORT = "8080"
+APP_DATA = "/app/data"
+
+[start]
+cmd = "java $JAVA_OPTS -jar target/name-suggestion.jar"
