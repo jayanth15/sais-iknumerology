@@ -1,18 +1,18 @@
-# Keep the bundled Java 17 executable JAR in Docker's build context.
-# Avoid blanket "**" exclusions: they can hide the JAR from COPY.
-# Exclude local secrets, development artefacts, and database/log files.
+# Keep only build inputs; prevent secrets and local binary artifacts in image context.
 .git
-.git/
-.idea/
-.vscode/
-target/
-build/
-.gradle/
-node_modules/
+.gitignore
+.idea
+.vscode
+.gradle
+.mvn/wrapper/maven-wrapper.jar
+node_modules
+target
+build
 *.log
 *.tmp
 *.bak
 *.zip
+*.jar
 .env
 .env.*
 *.pem
@@ -24,8 +24,3 @@ node_modules/
 *.mv.db
 *.trace.db
 .DS_Store
-
-# INTENTIONALLY NOT IGNORED:
-# Dockerfile
-# docker-entrypoint.sh
-# name-suggestion.jar
