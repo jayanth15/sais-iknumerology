@@ -1,3 +1,5 @@
+> **Docker build fix:** If `COPY name-suggestion.jar` fails, verify that you have extracted `name-garden/name-suggestion.jar` and run Docker from inside `name-garden`. See `DOCKER_README.md` for the detailed check.
+
 # IK’s Numerology — Sarvam AI + Excel import
 
 Java 17+, Spring Boot and Thymeleaf. The Suggestions page offers two name sources: Sarvam AI generation or upload your own Excel names and meanings.

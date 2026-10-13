@@ -1,5 +1,37 @@
 # IK's Numerology — Docker (Java 17)
 
+## Verify build context (Windows PowerShell)
+
+This package **contains** `name-suggestion.jar` inside `name-garden/`. Extract the
+whole ZIP; **do not build the Docker image from the parent directory**.
+
+In PowerShell, open the extracted `name-garden` folder (with `compose.yaml`
+and `Dockerfile`), then run:
+
+```powershell
+Get-Location
+Test-Path .\name-suggestion.jar
+Get-Item .\name-suggestion.jar | Select-Object Name,Length
+Test-Path .\Dockerfile
+Test-Path .\compose.yaml
+```
+
+All `Test-Path` results should be `True`. The JAR should be about **53 MB**.
+If the JAR is missing, extract the full ZIP again into a fresh directory.
+The corrected `.dockerignore` no longer excludes the entire context.
+
+Rebuild with:
+
+```powershell
+docker compose build --no-cache
+docker compose up -d --force-recreate
+```
+
+If the error still reads `"/name-suggestion.jar": not found`, confirm the
+`Get-Location` path ends in `name-garden`; check that Windows Defender or your
+unzip tool didn't quarantine or skip the JAR. Avoid running `docker build` from
+outside `name-garden`.
+
 Includes the executable JAR, modern date picker, branded customer PDF, Sarvam name generation and local Excel (.xls/.xlsx) upload mode.
 
 **Requirements:** Docker Desktop / Docker Engine. A valid **Sarvam AI API key is optional** and is only needed for Sarvam mode. Docker downloads an Eclipse Temurin **Java 17 JRE** image the first time you build. No JDK or Maven installation is required on your PC.

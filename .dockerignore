@@ -1,5 +1,31 @@
-# Only the runtime files are needed: never send secret files into the build context.
-**
-!Dockerfile
-!docker-entrypoint.sh
-!name-suggestion.jar
+# Keep the bundled Java 17 executable JAR in Docker's build context.
+# Avoid blanket "**" exclusions: they can hide the JAR from COPY.
+# Exclude local secrets, development artefacts, and database/log files.
+.git
+.git/
+.idea/
+.vscode/
+target/
+build/
+.gradle/
+node_modules/
+*.log
+*.tmp
+*.bak
+*.zip
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.mv.db
+*.trace.db
+.DS_Store
+
+# INTENTIONALLY NOT IGNORED:
+# Dockerfile
+# docker-entrypoint.sh
+# name-suggestion.jar
