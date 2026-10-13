@@ -5,14 +5,13 @@
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /build
 
-# Resolve dependencies in a separately cached layer for faster future deploys.
+# A regional Maven Central mirror avoids HTTP 429 from Render shared egress.
+# Do not run dependency:go-offline: it doubles resolution traffic on cold builds.
 COPY pom.xml ./
-RUN mvn -B -ntp -DskipTests dependency:go-offline
-
-# Maven builds name-suggestion.jar in /build/target.
+COPY maven-settings.xml ./
 COPY src ./src
-# Deploy image creation skips tests; run `mvn clean verify` locally/CI.
-RUN mvn -B -ntp -DskipTests clean package \
+# Build the JAR from source. Tests run separately in CI.
+RUN mvn -s /build/maven-settings.xml -B -ntp -U -DskipTests package \
     && test -s /build/target/name-suggestion.jar
 
 # Stage 2: slim Java 17 runtime. Maven and application source are not shipped.

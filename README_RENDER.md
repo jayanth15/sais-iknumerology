@@ -1,84 +1,26 @@
-# IK's Numerology — Render source-build deployment (Java 17)
+# Render 429 fix — IK's Numerology
 
-This package uses a **multi-stage Dockerfile**. Render builds `target/name-suggestion.jar`
-from `pom.xml` and `src/` using Maven, then copies the JAR into a Java 17 runtime
-image. Do **not** upload or commit `name-suggestion.jar` to GitHub.
+**Observed deployment failure:** Maven Central returned `HTTP 429 Too Many Requests` while resolving `org.springframework.boot:spring-boot-starter-parent:3.5.6`, at the `dependency:go-offline` step.
 
-## GitHub repository layout
+**Fix:** use `maven-settings.xml` with the Google Cloud Asia Maven Central mirror and build once using `mvn -s /build/maven-settings.xml -B -ntp -U -DskipTests package`. Nothing in the application logic or POM versions is changed.
 
-Put these files directly at the *root* of `jayanth15/sais-iknumerology`
-(the same folder that contains the current Dockerfile):
+## Minimal update to your existing GitHub repository
 
-```
-Dockerfile
-.dockerignore
-docker-entrypoint.sh
-pom.xml
-src/main/java/...
-src/main/resources/...
-src/test/java/...
-compose.yaml
-```
+Copy just these **two files** from this package to your repository root, replacing the existing Dockerfile:
 
-If your existing repository already includes `pom.xml`, `src/`, and
-`docker-entrypoint.sh`, replacing **Dockerfile** and **.dockerignore** is enough.
-Otherwise copy the complete source package into the repository root.
+- `Dockerfile`
+- `maven-settings.xml` (new file)
 
-## Render settings
+Then push:
 
-- Runtime: Docker
-- Branch: main
-- Root Directory: blank (repository root)
-- Dockerfile Path: `./Dockerfile`
-- Docker Build Context: `.`
-- Environment variable `SARVAM_API_KEY`: supply your real key via Render Dashboard
-  **Environment** only if using Sarvam AI. Do not write it into the Dockerfile or GitHub.
-- `PORT`: Render supplies its runtime PORT; the entrypoint and app configuration use it.
-- Excel-only mode does not require a Sarvam key.
-
-Commit and push the Dockerfile / source changes to GitHub. Since automatic
-production deploys are enabled for this service, the push triggers the build.
-Avoid manually redeploying an unchanged commit to fix a missing file.
-
-## Verify locally (optional)
-
-```
-docker build --progress=plain -t iks-numerology:java17 .
+```powershell
+git add Dockerfile maven-settings.xml
+git commit -m "Fix Maven Central 429 on Render Docker build"
+git push origin main
 ```
 
-You can also run Java tests independently:
+Render auto-deploys the new commit. Dockerfile builds the JAR during deployment; no prebuilt JAR is needed. The runtime still uses Java 17; the API key is injected as the `SARVAM_API_KEY` runtime environment variable in Render.
 
-```
-mvn clean verify
-```
+If Google mirror itself is inaccessible from your infrastructure, replace its URL in `maven-settings.xml` with your company's Maven repository manager/cache URL and retry.
 
-The Docker build deliberately uses `-DskipTests` because Maven unit tests should
-run in local development/CI and not prevent a release if they require a test
-fixture. Production Java sources still compile during image build.
-
-## Local Docker Compose
-
-Windows PowerShell (Sarvam mode):
-
-```
-$env:SARVAM_API_KEY = Read-Host "SARVAM_API_KEY"
-docker compose up -d --build
-```
-
-Excel-only mode:
-
-```
-docker compose up -d --build
-```
-
-The local Docker Compose project persists the H2 database to a named volume.
-**Render:** the free service filesystem is ephemeral. Add persistent storage on
-an eligible paid plan, or migrate H2 to a persistent database to retain user
-accounts and cached names across replacement deployments.
-
-## If a new error appears
-
-- Missing `pom.xml` or `src/`: ensure these exist in the Docker build context.
-- Maven compiler error: inspect the next failed build log for source errors.
-- Startup error after successful Docker build: inspect application logs and
-  Render environment variables.
+**Validation performed:** Maven settings XML parsed successfully, required Docker COPY paths exist, and ZIP includes full Java source. **Not performed:** live Docker build, Maven dependency download or a new Render deploy.
