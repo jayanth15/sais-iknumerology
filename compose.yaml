@@ -6,7 +6,7 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     environment:
-      SARVAM_API_KEY: ${SARVAM_API_KEY:?Set SARVAM_API_KEY in your terminal before starting Docker Compose}
+      SARVAM_API_KEY: ${SARVAM_API_KEY:-}
       SARVAM_PARALLELISM: ${SARVAM_PARALLELISM:-14}
       SARVAM_MAX_BATCHES: ${SARVAM_MAX_BATCHES:-36}
       SARVAM_MAX_SECONDS: ${SARVAM_MAX_SECONDS:-28}

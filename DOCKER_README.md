@@ -1,8 +1,8 @@
 # IK's Numerology — Docker (Java 17)
 
-Includes the executable JAR, modern date picker, branded customer PDF and 500-name Sarvam acceleration.
+Includes the executable JAR, modern date picker, branded customer PDF, Sarvam name generation and local Excel (.xls/.xlsx) upload mode.
 
-**Requirements:** Docker Desktop / Docker Engine, and a valid **Sarvam AI API key**. Docker downloads an Eclipse Temurin **Java 17 JRE** image the first time you build. No JDK or Maven installation is required on your PC.
+**Requirements:** Docker Desktop / Docker Engine. A valid **Sarvam AI API key is optional** and is only needed for Sarvam mode. Docker downloads an Eclipse Temurin **Java 17 JRE** image the first time you build. No JDK or Maven installation is required on your PC.
 
 ## Windows PowerShell — fastest start
 
@@ -53,7 +53,25 @@ docker compose up --build -d
 Remove-Item Env:SARVAM_API_KEY
 ```
 
-Note: `docker compose up` requires `SARVAM_API_KEY` in your local environment. It deliberately refuses to start if missing.
+Excel-only mode works even if `SARVAM_API_KEY` is unset. Docker Compose then starts without the key; Sarvam mode displays a setup message until the container is recreated with the key.
+
+## Start without an API key (Excel-only mode)
+
+```powershell
+docker build -t iks-numerology:java17 .
+docker run -d --name iks-numerology -p 127.0.0.1:8080:8080 -v iks-numerology-data:/app/data iks-numerology:java17
+```
+
+Or run `docker compose up -d --build` without defining `SARVAM_API_KEY`.
+On the Suggestions page, select **Upload Excel**, choose your `.xls` or `.xlsx`
+file (columns `Name`, `Meaning`), then use the usual filters and customer PDF.
+The file is transferred to your local web server for processing; it is not
+retained in the database, Docker image or persistent data volume. The server
+may temporarily buffer multipart uploads. Use HTTPS if exposing the app remotely.
+
+To enable Sarvam later, recreate the container with the key using the usual
+Docker Run or Compose instructions above. Sarvam remains the default name source
+in the app, but you can switch to Excel without an API key.
 
 ## Day-to-day commands
 

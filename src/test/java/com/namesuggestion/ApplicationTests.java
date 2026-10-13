@@ -63,7 +63,7 @@ class ApplicationTests {
   mvc.perform(get("/")).andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Find a name")));
   var response=mvc.perform(post("/suggestions").with(csrf()).param("dateOfBirth","1992-07-03").param("startLetter","P").param("surname","Saikiran").param("language","Tamil").param("gender","Male"))
    .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("matching names")))
-   .andExpect(content().string(org.hamcrest.Matchers.containsString("no names are loaded from a local catalogue")))
+   .andExpect(content().string(org.hamcrest.Matchers.containsString("Sarvam AI")))
    .andExpect(content().string(org.hamcrest.Matchers.containsString("Download User PDF")))
    .andExpect(content().string(org.hamcrest.Matchers.containsString("Download Customer PDF")))
    .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Download Excel")))).andReturn();

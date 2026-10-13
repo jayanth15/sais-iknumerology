@@ -1,10 +1,10 @@
-# Name Garden — Sarvam AI edition
+# IK’s Numerology — Sarvam AI + Excel import
 
-Java 17+, Spring Boot and Thymeleaf. Sarvam replaces Wikidata entirely.
-All suggestions come from Sarvam API completions. The application now persists
+Java 17+, Spring Boot and Thymeleaf. The Suggestions page offers two name sources: Sarvam AI generation or upload your own Excel names and meanings.
+Only the Sarvam AI option calls Sarvam. The application now persists
 Sarvam-provided names and meanings in the existing H2 database and reuses them
 for later searches with the same language, gender and prefix. No local prefilled
-name catalogue or fabricated fallback names are used.
+name catalogue or fabricated fallback names are used. Uploaded Excel names are only used for the current search.
 
 ## Run on Windows (PowerShell)
 
@@ -28,14 +28,46 @@ java -jar name-suggestion.jar
 IntelliJ: set SARVAM_API_KEY in Run Configuration > Environment variables.
 AWS: inject the same environment variable at runtime, preferably from your secret
 manager. The JAR contains no API key. An internet connection and an enabled Sarvam
-chat-completion account with credits/quota are needed. Existing local H2 accounts
+chat-completion account with credits/quota are needed only for Sarvam mode. Excel mode works offline and without an API key. Existing local H2 accounts
 remain compatible. Keep your existing data folder when upgrading.
+
+## Choosing Sarvam AI or Upload Excel
+
+On the Suggestions page, choose **Sarvam AI** (default) or **Upload Excel**.
+For Excel, select a `.xls` or `.xlsx` workbook from your own machine; the first
+worksheet's first row must contain `Name` and `Meaning` (case-insensitive and
+in either order). The columns may have other columns alongside them.
+
+| Name | Meaning |
+|---|---|
+| Pranav | Sacred sound Om |
+| Paavan | Pure |
+| Priyan | Beloved |
+
+Use conventional English-letter spellings for the original A–Z numerology mapping.
+The file can contain more than 500 rows; the form takes up to the selected
+**candidate count** (100 by default; max 500) of unique names from the
+workbook without applying a starting-letter filter, before the **final number**
+filter. The Starting Letters field becomes disabled in Excel mode. It removes duplicates,
+skips rows with invalid names, blank/overlong meanings, or formulas, and reports
+counts. Uploaded Name and Meaning values are used **as supplied**. Language and
+gender selected in the form become report labels; the workbook does not need
+those columns. The workbook must be 5 MB or smaller and contain at most 15,000
+rows. The upload is used for the current request and is **not
+retained by the application**. The web server may temporarily buffer uploads
+during a request, but does not save them to the app database. Results are kept in the signed-in user's session for the
+normal User PDF, branded Customer PDF, and existing export functionality.
+
+**Excel mode makes no Sarvam API calls.** The app and Docker container can start
+with a blank API key; choosing Sarvam without a key shows a setup message.
+If needed, start the server again with `SARVAM_API_KEY` set. Uploaded workbooks
+are not included in the persistent Sarvam cache.
 
 ## IK's Numerology branding (customer PDF only)
 
 The **Customer PDF** now embeds the IK's Numerology teal-and-gold logo in
 its header, together with **+91 9944925273**, **+91 9944769370** and
-**iksaikiran.kiran@gmail.com**. The branded header is repeated on every
+**iksnumerology@gmail.com**. The branded header is repeated on every
 customer PDF page, with a repeated column header on continuation pages.
 The surname, gender, date-of-birth fields and names/meanings table remain.
 The User PDF, XLSX and calculator PDF are unchanged. The bundled
@@ -61,7 +93,7 @@ native date input remains available. No third-party CDN is needed.
 - Validates any returned language/gender labels when present, ASCII spelling and
   prefix; deduplicates case-insensitively. Labels and meanings remain AI claims,
   not independently verified facts. The app asks the model not to invent names.
-- The form requests 1–500 candidates BEFORE the pyramid-number filter. Default
+- In either mode, the form requests 1–500 candidates BEFORE the pyramid-number filter. Default
   is 100. Requests above 500 are rejected by server-side validation.
 - For searches of 100–500 candidates, up to 14 Sarvam requests run concurrently,
   each requesting up to 50 names. Independent prompts encourage different groups
@@ -86,7 +118,7 @@ native date input remains available. No third-party CDN is needed.
 
 Start with the default 100 candidates to check your key and output quality.
 You can increase the request up to 500, but larger generations may take longer
-and incur additional Sarvam API charges. The price
+and incur additional Sarvam API charges. Sarvam mode only: the price
 charged is controlled by Sarvam and your account plan; this application is no
 longer key-free or guaranteed free. Cached repeats do not generate more API calls when the saved Sarvam results cover
 the requested count. A cache miss may make paid requests. For reverse proxies, set
@@ -106,7 +138,7 @@ and account rate limits; a cold 500-name request is not guaranteed in 30 seconds
 | BIND_ADDRESS | 127.0.0.1 | Bind address; use 0.0.0.0 when hosting |
 | APP_DATA | ./data | H2 account database directory |
 
-All ten original language choices remain. Quality/coverage varies by language;
+All ten original language choices remain for filtering/labels. Quality/coverage varies by language;
 English spellings allow the existing A–Z calculation and portable PDF font.
 Neutral means unisex. Native-script rendering/transliteration is not added.
 
@@ -151,15 +183,4 @@ https://docs.sarvam.ai/api-reference/authentication
 ## Docker (Java 17, automatic startup)
 
 A Dockerfile, Docker Compose configuration, startup script and detailed Windows/Linux instructions are included. **See [DOCKER_README.md](DOCKER_README.md)**. Pass your Sarvam key at runtime using `SARVAM_API_KEY` (never bake it into the image).
-
-## Dokploy (Nixpacks build)
-
-This repository builds as-is with Nixpacks (Java/Maven provider, JDK 17). The included `nixpacks.toml` pins the same runtime defaults as the Dockerfile (`BIND_ADDRESS=0.0.0.0`, `PORT=8080`, `APP_DATA=/app/data`) and starts `target/name-suggestion.jar`.
-
-In Dokploy:
-
-1. Set the application **Build Type** to **Nixpacks** (no base directory; the repo root is the app root).
-2. Add environment variable `SARVAM_API_KEY` (never commit the key).
-3. Set the application/domain port to **8080**.
-4. Mount a volume at **/app/data** to keep the H2 user database across redeploys.
 

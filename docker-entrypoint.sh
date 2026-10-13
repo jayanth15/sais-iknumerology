@@ -2,8 +2,7 @@
 set -eu
 
 if [ -z "${SARVAM_API_KEY:-}" ]; then
-    printf '%s\n' 'ERROR: Missing Sarvam API key.' 'Pass it when starting the container with: docker run -e SARVAM_API_KEY ...' >&2
-    exit 1
+    printf '%s\n' 'INFO: SARVAM_API_KEY is not set. Excel upload mode is available; Sarvam AI requires the key at startup.' >&2
 fi
 
 # Forward optional Spring Boot arguments while keeping the API key out of the command line.

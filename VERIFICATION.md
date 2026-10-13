@@ -62,3 +62,27 @@ included. Native Windows/macOS and AWS deployment were not tested.
   seconds with a real Sarvam account was NOT established. Strict prefixes,
   duplicate model output, unavailable established names and account throttling
   can all lower the final count. The API search stops near the 28-second budget.
+
+## Excel name source extension (2026-10-12)
+
+- Java 17 target compilation passed (`javac --release 17 -parameters`).
+- Parsed **both** `.xls` (HSSF) and `.xlsx` (XSSF), preserving supplied meanings.
+- Parsed an `.xlsx` sheet with 620 unique prefix-matching candidates and capped the pre-filter list at **500**.
+- Confirmed that the existing Java pyramid calculation and final-number filter apply equally to Excel records.
+- Rejected invalid Name/Meaning headings and unsupported filename extensions.
+- Booted the executable Spring Boot JAR **without** `SARVAM_API_KEY` on localhost.
+- Logged in through the real Spring Security form with CSRF protection, uploaded an Excel file and received matching names and meanings.
+- Exported and examined the branded Customer PDF; both phone numbers and the email remained present.
+- Verified User PDF and Excel export endpoints also returned their original content types.
+- The workbook is processed in-memory for the search only; it is not inserted into the Sarvam cache.
+- Full `docker build` was not run because Docker is unavailable in this execution environment.
+
+## Excel starting-letter UI and customer PDF email update (2026-10-12)
+
+- The Starting Letters input is disabled and not required when Excel is selected; it is restored and required when switching to Sarvam AI.
+- Server-side validation does not require a starting-letter prefix for Excel; the Excel processing path ignores even a stale/manually submitted prefix.
+- Confirmed an Excel upload without any startLetter field works using the actual logged-in Spring Boot site, and names with different first letters are retained.
+- Sarvam AI still requires starting letters and its prefix-based filtering remains unchanged.
+- Extracted text from the generated customer PDF and confirmed `iksnumerology@gmail.com` appears while the previous email address is absent. Both phone numbers and the logo remain unchanged.
+- Java classes compiled with Java 17 bytecode target; updated JAR booted successfully without a Sarvam key.
+- Full Docker image was not built in this environment; Dockerfile and compose settings remain unchanged.

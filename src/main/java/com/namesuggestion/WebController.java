@@ -2,11 +2,11 @@ package com.namesuggestion;
 import org.springframework.stereotype.Controller;import org.springframework.ui.Model;import org.springframework.web.bind.annotation.*;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;import org.springframework.security.crypto.password.PasswordEncoder;import org.springframework.security.core.userdetails.User;
 import org.springframework.validation.BindingResult;import org.springframework.http.*;import org.springframework.dao.DuplicateKeyException;
-import jakarta.servlet.http.HttpSession;import java.util.*;
+import jakarta.servlet.http.HttpSession;import java.util.*;import org.springframework.web.multipart.MultipartFile;
 @Controller
 public class WebController {
- private final OnlineNameService online;private final CatalogueService catalogue;private final PyramidService pyramid;private final ExportService exports;private final JdbcUserDetailsManager users;private final PasswordEncoder encoder;
- public WebController(CatalogueService c,PyramidService p,ExportService e,JdbcUserDetailsManager u,PasswordEncoder encoder,OnlineNameService online){this.online=online;catalogue=c;pyramid=p;exports=e;users=u;this.encoder=encoder;}
+ private final OnlineNameService online;private final ExcelNameService excelNames;private final CatalogueService catalogue;private final PyramidService pyramid;private final ExportService exports;private final JdbcUserDetailsManager users;private final PasswordEncoder encoder;
+ public WebController(CatalogueService c,PyramidService p,ExportService e,JdbcUserDetailsManager u,PasswordEncoder encoder,OnlineNameService online,ExcelNameService excelNames){this.online=online;this.excelNames=excelNames;catalogue=c;pyramid=p;exports=e;users=u;this.encoder=encoder;}
  @ModelAttribute void shared(Model m){m.addAttribute("languages",CatalogueService.LANGUAGES);m.addAttribute("genders",CatalogueService.GENDERS);}
  @GetMapping("/login")String login(){return "login";}
  @GetMapping("/register")String register(){return "register";}
@@ -17,10 +17,12 @@ public class WebController {
   return "redirect:/login?registered";
  }
  @GetMapping({"/","/home"})String home(Model m){m.addAttribute("form",new SearchForm());return "index";}
- @PostMapping("/suggestions")String suggestions(@ModelAttribute("form")SearchForm form,BindingResult binding,Model m,HttpSession session){
+ @PostMapping("/suggestions")String suggestions(@ModelAttribute("form")SearchForm form,BindingResult binding,@RequestParam(value="namesFile",required=false) MultipartFile namesFile,Model m,HttpSession session){
   session.removeAttribute("search");session.removeAttribute("results");
   if(binding.hasErrors()){m.addAttribute("error","Final number must be blank or an integer from 1 to 9; candidate count must be an integer from 1 to 500.");return "index";}
-  try{var search=catalogue.searchWithInternet(form,online);var result=search.names();m.addAttribute("sourceMessage",search.message());m.addAttribute("results",result);session.setAttribute("results",result);session.setAttribute("search",form);}
+  try{if("EXCEL".equals(form.getNameSource()))form.setStartLetter("");form.validate();var search="EXCEL".equals(form.getNameSource())
+    ?catalogue.searchFromExcel(form,excelNames.read(namesFile))
+    :catalogue.searchWithInternet(form,online);var result=search.names();m.addAttribute("sourceMessage",search.message());m.addAttribute("results",result);session.setAttribute("results",result);session.setAttribute("search",form);}
   catch(IllegalArgumentException e){m.addAttribute("error",e.getMessage());}return "index";
  }
  @GetMapping("/calculator")String calculator(){return "calculator";}

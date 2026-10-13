@@ -41,13 +41,13 @@ public class ExportService {
     private static final PDFont BOLD = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
     private static final String CONTACT_PHONE = "+91 9944925273";
     private static final String CONTACT_PHONE_ALT = "+91 9944769370";
-    private static final String CONTACT_EMAIL = "iksaikiran.kiran@gmail.com";
+    private static final String CONTACT_EMAIL = "iksnumerology@gmail.com";
     private static final String CUSTOMER_LOGO_RESOURCE = "/pdf/iks-numerology-logo.png";
 
     private List<String[]> criteria(SearchForm form) {
         List<String[]> rows = new ArrayList<>();
         rows.add(new String[]{"Language:", form.getLanguage()});
-        rows.add(new String[]{"Starting Pattern:", form.getStartLetter()});
+        if ("SARVAM".equals(form.getNameSource())) rows.add(new String[]{"Starting Pattern:", form.getStartLetter()});
         rows.add(new String[]{"Surname:", form.getSurname()});
         rows.add(new String[]{"Name Order:", form.isSurnameFirst()
                 ? "Surname before Starting Pattern" : "Starting Pattern before Surname"});
