@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Name Garden · Suggestions</title><link rel="stylesheet" th:href="@{/style.css}"><script defer th:src="@{/date-picker.js}"></script><script defer th:src="@{/generation-progress.js}"></script></head><body>
+<!DOCTYPE html><html lang="en" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Name Garden · Suggestions</title><link rel="stylesheet" th:href="@{/style.css}"><script defer th:src="@{/date-picker.js}"></script><script defer th:src="@{/birth-time-picker.js}"></script><script defer th:src="@{/generation-progress.js}"></script></head><body>
 <header th:replace="~{fragments :: nav}"></header><main><div class="eyebrow">A name with meaning</div><h1>Find a name that fits.</h1><p class="intro">Choose Sarvam AI to generate names online, or upload your own Excel workbook containing names and meanings. Either way, the same pyramid numerology filters, customer PDFs, and downloads apply.</p>
 <div class="error" role="alert" th:if="${error}" th:text="${error}"></div>
 <form class="card" id="nameSearchForm" method="post" enctype="multipart/form-data" th:action="@{/suggestions}" th:object="${form}">
@@ -38,7 +38,24 @@
     </div>
   </div>
 </div>
-<small id="dobHint" class="dob-help">Choose month and year instantly, or type DD/MM/YYYY. For report information only.</small>
+<small id="dobHint" class="dob-help">Choose month and year instantly, or type DD/MM/YYYY. Birth date used to calculate Raasi and Natchathiram together with birth time.</small>
+</div>
+<div class="suggestion-birth-time" data-time-picker>
+  <label for="suggestionBirthTime">Time of birth (IST)</label>
+  <input id="suggestionBirthTime" class="birth-time-native" type="time" th:field="*{timeOfBirth}" step="60" required aria-describedby="suggestionBirthTimeHelp">
+  <div class="birth-time-enhanced" hidden>
+    <div class="birth-time-row" role="group" aria-label="Select birth time in 12 hour format">
+      <label class="birth-time-part" for="suggestionBirthHour"><span>Hour</span><select id="suggestionBirthHour" class="birth-hour" required aria-label="Birth hour"></select></label>
+      <span class="birth-time-colon" aria-hidden="true">:</span>
+      <label class="birth-time-part" for="suggestionBirthMinute"><span>Minute</span><select id="suggestionBirthMinute" class="birth-minute" required aria-label="Birth minute"></select></label>
+      <fieldset class="birth-period" aria-label="AM or PM"><legend>Period</legend>
+        <label class="birth-period-option"><input type="radio" name="timeDisplayPeriod" value="AM" checked><span>AM</span></label>
+        <label class="birth-period-option"><input type="radio" name="timeDisplayPeriod" value="PM"><span>PM</span></label>
+      </fieldset>
+    </div>
+    <div class="birth-time-live" aria-live="polite">Choose an hour and minute</div>
+  </div>
+  <small id="suggestionBirthTimeHelp">Choose the exact hour, minute and AM/PM. For Indian births (IST); used for the Customer PDF Raasi and Natchathiram.</small>
 </div>
 <label>Starting letters<input th:field="*{startLetter}" placeholder="P, Pra, Ka…" maxlength="30" pattern="[A-Za-z]+" th:disabled="${form.nameSource == 'EXCEL'}" th:required="${form.nameSource != 'EXCEL'}" aria-describedby="startLetterHelp"><small id="startLetterHelp">Required for Sarvam AI; disabled and not used for Excel uploads.</small></label>
 <label>Surname / initials<input th:field="*{surname}" placeholder="Saikiran Kamali" maxlength="80" required></label>

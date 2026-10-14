@@ -42,7 +42,7 @@ class ExcelUploadTests {
  private MockMultipartFile upload(boolean legacy,boolean header)throws IOException{
   return new MockMultipartFile("namesFile",legacy?"sample.xls":"sample.xlsx",legacy?"application/vnd.ms-excel":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",workbook(legacy,header));
  }
- private SearchForm form(){SearchForm f=new SearchForm();f.setNameSource("EXCEL");f.setDateOfBirth("1992-07-03");f.setStartLetter("P");f.setSurname("Saikiran");return f;}
+ private SearchForm form(){SearchForm f=new SearchForm();f.setNameSource("EXCEL");f.setDateOfBirth("1992-07-03");f.setTimeOfBirth("13:49");f.setStartLetter("P");f.setSurname("Saikiran");return f;}
  @Test void bothExcelFormatsAndSamePyramidFilters()throws Exception {
   for(boolean legacy:new boolean[]{false,true}){
    var parsed=uploads.read(upload(legacy,true));
@@ -60,7 +60,7 @@ class ExcelUploadTests {
  @Test @WithMockUser void uploadRendersResultsWithoutCallingSarvam()throws Exception{
   mvc.perform(multipart("/suggestions").file(upload(false,true)).with(csrf())
    .param("nameSource","EXCEL").param("candidateCount","100")
-   .param("dateOfBirth","1992-07-03").param("surname","Saikiran")
+   .param("dateOfBirth","1992-07-03").param("timeOfBirth","13:49").param("surname","Saikiran")
    .param("language","Tamil").param("gender","Male"))
     .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Sacred sound Om")))
     .andExpect(content().string(org.hamcrest.Matchers.containsString("Arun Saikiran")))
@@ -69,7 +69,7 @@ class ExcelUploadTests {
   verifyNoInteractions(online);
  }
  @Test @WithMockUser void excelModeRequiresFile()throws Exception{
-  mvc.perform(post("/suggestions").with(csrf()).param("nameSource","EXCEL").param("dateOfBirth","1992-07-03")
+  mvc.perform(post("/suggestions").with(csrf()).param("nameSource","EXCEL").param("dateOfBirth","1992-07-03").param("timeOfBirth","13:49")
    .param("surname","Saikiran")).andExpect(status().isOk())
    .andExpect(content().string(org.hamcrest.Matchers.containsString("Choose an Excel file")));
   verifyNoInteractions(online);

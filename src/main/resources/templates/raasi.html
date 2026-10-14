@@ -75,7 +75,15 @@
   </form>
 
   <section class="card raasi-result" th:if="${birthResult != null}" aria-live="polite">
-    <div class="eyebrow">Your result / உங்கள் நட்சத்திரம்</div>
+    <div class="raasi-result-actions">
+      <span class="eyebrow">Your result / உங்கள் நட்சத்திரம்</span>
+      <form th:action="@{/raasi/download}" method="post" class="raasi-pdf-download-form">
+        <input type="hidden" name="dateOfBirth" th:value="${birthResult.dateOfBirth}">
+        <input type="hidden" name="timeOfBirth" th:value="${birthResult.timeOfBirth}">
+        <input type="hidden" name="placeOfBirth" th:value="${birthResult.placeOfBirth}">
+        <button class="raasi-pdf-download" type="submit" aria-label="Download your Raasi and Natchathiram results as PDF">⬇ Download PDF</button>
+      </form>
+    </div>
     <h2 th:text="${birthResult.raasiTamil + ' ராசி · ' + birthResult.natchathiramTamil + ' நட்சத்திரம்'}">Birth sign</h2>
     <div class="raasi-result-grid">
       <div class="raasi-metric"><small>Raasi / ராசி</small><strong th:text="${birthResult.raasiTamil}"></strong><span th:text="${birthResult.raasi}"></span></div>

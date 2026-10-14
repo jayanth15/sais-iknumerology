@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class ExportService {
@@ -43,6 +46,13 @@ public class ExportService {
     private static final String CONTACT_PHONE_ALT = "+91 9944769370";
     private static final String CONTACT_EMAIL = "iksnumerology@gmail.com";
     private static final String CUSTOMER_LOGO_RESOURCE = "/pdf/iks-numerology-logo.png";
+    private static final DateTimeFormatter BIRTH_DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/uuuu", Locale.ENGLISH);
+    private static final DateTimeFormatter BIRTH_TIME_FORMAT = DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH);
+    private final RaasiCalculatorService raasiCalculator;
+
+    public ExportService(RaasiCalculatorService raasiCalculator) {
+        this.raasiCalculator = raasiCalculator;
+    }
 
     private List<String[]> criteria(SearchForm form) {
         List<String[]> rows = new ArrayList<>();
@@ -58,11 +68,31 @@ public class ExportService {
         return rows;
     }
 
+    /** Customer output: preserve local IST clock and use the same Moon calculator as /raasi. */
     private List<String[]> customerCriteria(SearchForm form) {
+        LocalDate date = LocalDate.parse(form.getDateOfBirth());
+        LocalTime time = LocalTime.parse(form.getTimeOfBirth());
+        String raasi;
+        String natchathiram;
+        try {
+            // The service computes geocentric Moon longitude; Indian birthplace does not
+            // alter the Moon sign for the given local IST timestamp.
+            var result = raasiCalculator.calculate(date, time, "India");
+            raasi = result.raasi();
+            natchathiram = result.natchathiram();
+        } catch (IllegalArgumentException e) {
+            // Existing suggestions can have DOBs before 1950, outside the Raasi
+            // calculator's validated range. Never fabricate an astrology result.
+            raasi = "Unavailable (outside supported date range)";
+            natchathiram = "Unavailable (outside supported date range)";
+        }
         return List.of(
                 new String[]{"Surname:", form.getSurname()},
                 new String[]{"Gender:", form.getGender()},
-                new String[]{"Date of Birth:", form.getDateOfBirth()}
+                new String[]{"Date of Birth:", date.format(BIRTH_DATE_FORMAT)},
+                new String[]{"Time of Birth:", time.format(BIRTH_TIME_FORMAT) + " IST"},
+                new String[]{"Raasi:", raasi},
+                new String[]{"Natchathiram:", natchathiram}
         );
     }
 
@@ -116,7 +146,7 @@ public class ExportService {
         try (PDDocument document = new PDDocument(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             // Load once per customer report and reuse the same embedded image on every page.
             // The internal/User PDF remains unchanged.
-            PDImageXObject logo = customer ? loadCustomerLogo(document) : null;
+            PDImageXObject logo = customer ? CustomerPdfBranding.loadLogo(document) : null;
             int index = 0;
             int pageNumber = 0;
             while (index < suggestions.size()) {
@@ -312,53 +342,9 @@ public class ExportService {
         }
     }
 
-    private PDImageXObject loadCustomerLogo(PDDocument document) throws IOException {
-        try (InputStream input = getClass().getResourceAsStream(CUSTOMER_LOGO_RESOURCE)) {
-            if (input == null) {
-                throw new IOException("Missing bundled IK's Numerology logo: " + CUSTOMER_LOGO_RESOURCE);
-            }
-            return PDImageXObject.createFromByteArray(document, input.readAllBytes(), "IK's Numerology");
-        }
-    }
-
-    /** Consistent branding on every page of the customer-facing PDF. */
-    private void drawCustomerBrandHeader(PDPageContentStream stream, PDImageXObject logo,
-                                         boolean firstPage) throws IOException {
-        float width = firstPage ? 255f : 225f;
-        float height = width * logo.getHeight() / logo.getWidth();
-        float top = PAGE_HEIGHT - 30f;
-        stream.drawImage(logo, LEFT, top - height, width, height);
-
-        // A subtle divider separates the wide logo from the right-aligned contact block.
-        stream.setStrokingColor(0.75f, 0.59f, 0.30f);
-        stream.setLineWidth(1.2f);
-        stream.moveTo(315f, PAGE_HEIGHT - 107f);
-        stream.lineTo(315f, PAGE_HEIGHT - 43f);
-        stream.stroke();
-
-        stream.setNonStrokingColor(0.69f, 0.50f, 0.20f);
-        writeText(stream, "CONTACT", 329f, PAGE_HEIGHT - 44f, BOLD, 8f);
-        stream.setNonStrokingColor(0.08f, 0.25f, 0.27f);
-        float labelX = 329f;
-        float valueX = 372f;
-        writeText(stream, "Phone:", labelX, PAGE_HEIGHT - 64f, BOLD, 8.6f);
-        writeText(stream, CONTACT_PHONE, valueX, PAGE_HEIGHT - 64f, BOLD, 8.6f);
-        writeText(stream, CONTACT_PHONE_ALT, valueX, PAGE_HEIGHT - 80f, BOLD, 8.6f);
-        writeText(stream, "Email:", labelX, PAGE_HEIGHT - 96f, BOLD, 8.7f);
-        writeText(stream, CONTACT_EMAIL, valueX, PAGE_HEIGHT - 96f, BOLD, 8.4f);
-
-        float separatorY = firstPage ? PAGE_HEIGHT - 130f : PAGE_HEIGHT - 124f;
-        stream.setStrokingColor(0.75f, 0.59f, 0.30f);
-        stream.setLineWidth(0.9f);
-        stream.moveTo(LEFT, separatorY);
-        stream.lineTo(PAGE_WIDTH - RIGHT, separatorY);
-        stream.stroke();
-        stream.setNonStrokingColor(0f, 0f, 0f);
-    }
-
     private float drawCustomerFirstPageHeading(PDPageContentStream stream, PDImageXObject logo,
                                                 SearchForm form) throws IOException {
-        drawCustomerBrandHeader(stream, logo, true);
+        CustomerPdfBranding.drawHeader(stream, logo, true);
         String title = "Name Suggestions";
         float titleWidth = BOLD.getStringWidth(title) * 17f / 1000f;
         stream.setNonStrokingColor(0.08f, 0.25f, 0.27f);
@@ -370,12 +356,12 @@ public class ExportService {
             writeText(stream, criterion[1], 211f, y, REGULAR, 10f);
             y -= 18f;
         }
-        return 588f; // 22pt clear gap after the last criterion baseline.
+        return y - 6f; // Dynamic spacing: keep table close despite two new astrology rows.
     }
 
     private float drawCustomerContinuationHeading(PDPageContentStream stream,
                                                    PDImageXObject logo) throws IOException {
-        drawCustomerBrandHeader(stream, logo, false);
+        CustomerPdfBranding.drawHeader(stream, logo, false);
         String title = "Name Suggestions (continued)";
         float titleWidth = BOLD.getStringWidth(title) * 12f / 1000f;
         stream.setNonStrokingColor(0.08f, 0.25f, 0.27f);

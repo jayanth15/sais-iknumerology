@@ -171,3 +171,19 @@
 .raasi-pada-letters-note{font-size:12px;color:#64796e;margin:12px 0 0;line-height:1.6}
 .raasi-pada-letters-warning{font-size:13px;color:#835408;background:#fff8e8;border:1px solid #e8c77b;border-radius:10px;padding:12px 15px;line-height:1.6;margin:12px 0 0}
 @media(max-width:600px){.raasi-pada-letters-summary{padding:13px;align-items:flex-start}.raasi-pada-letters-summary strong{font-size:16px}.raasi-pada-letters-tamil{font-size:26px}.raasi-pada-letters-english{font-size:17px}.raasi-pada-letters-table th,.raasi-pada-letters-table td{padding:11px 8px;font-size:12px}.raasi-pada-letters-table tbody th{width:36%}.raasi-pada-letters-table tbody td[lang=ta]{font-size:19px;min-width:50px}.raasi-pada-letters-table thead th span{display:block;font-size:11px}}
+
+/* Name suggestions: reuse the accessible, modern clock widget from the Raasi page. */
+.suggestion-birth-time { min-width:0; padding:12px; border:1px solid #dce9df; border-radius:13px; background:#f7fbf8 }
+.suggestion-birth-time > label { color:#244e3b }
+.suggestion-birth-time .birth-time-native { height:49px }
+.suggestion-birth-time .birth-time-row { margin-top:8px }
+.suggestion-birth-time > small { display:block; margin-top:7px; line-height:1.45 }
+@media(min-width:701px) and (max-width:970px){ .suggestion-birth-time .birth-time-row{flex-wrap:wrap} .suggestion-birth-time .birth-period{flex-basis:100%} }
+
+/* One-click PDF download appears only after a valid Raasi calculation. */
+.raasi-result-actions {display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;}
+.raasi-result-actions .raasi-pdf-download-form {margin:0; padding:0; border:0; box-shadow:none; background:none; width:auto;}
+.raasi-result-actions .raasi-pdf-download {border:0; border-radius:10px; background:#123d73; color:white; font-weight:700; font-size:14px; padding:11px 17px; cursor:pointer; line-height:1.3;}
+.raasi-result-actions .raasi-pdf-download:hover {background:#0b2d56;}
+.raasi-result-actions .raasi-pdf-download:focus-visible {outline:3px solid #76bcff; outline-offset:3px;}
+@media(max-width:560px){.raasi-result-actions{align-items:stretch;}.raasi-result-actions .raasi-pdf-download-form,.raasi-result-actions .raasi-pdf-download{width:100%;}}

@@ -10,7 +10,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @SpringBootTest(properties={"spring.datasource.url=jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"}) @AutoConfigureMockMvc
 class ApplicationTests {
  @Autowired PyramidService pyramid;@Autowired CatalogueService catalogue;@Autowired ExportService export;@Autowired MockMvc mvc;@MockitoBean OnlineNameService online;
- SearchForm form(){SearchForm f=new SearchForm();f.setDateOfBirth("1992-07-03");f.setStartLetter("P");f.setSurname("Saikiran Kamali");return f;}
+ SearchForm form(){SearchForm f=new SearchForm();f.setDateOfBirth("1992-07-03");f.setTimeOfBirth("13:49");f.setStartLetter("P");f.setSurname("Saikiran Kamali");return f;}
  List<OnlineNameService.OnlineName> sourceNames(int count){var values=new ArrayList<OnlineNameService.OnlineName>();for(int i=0;i<count;i++){String n="P"+alpha(i);values.add(new OnlineNameService.OnlineName(n,"male given name",""));}return values;}
  String alpha(int value){StringBuilder out=new StringBuilder();do{out.append((char)('A'+value%26));value=value/26-1;}while(value>=0);return out.reverse().toString();}
  @Test void goldenValuesAndWhitespace(){assertEquals(3,pyramid.calculate("AB","",false).finalNumber());assertEquals(3,pyramid.calculate("A B","",false).finalNumber());assertEquals(9,pyramid.calculate("AP","",false).finalNumber());assertEquals(9,pyramid.calculate("F","A",false).finalNumber());assertEquals("A B",pyramid.calculate(" A "," B ",false).combinedName());}
@@ -34,7 +34,7 @@ class ApplicationTests {
  @Test void validationRunsBeforeOnlineLookup(){SearchForm f=form();assertEquals(100,f.getCandidateCount());f.setCandidateCount(100);assertDoesNotThrow(f::validate);f.setCandidateCount(500);assertDoesNotThrow(f::validate);f.setCandidateCount(501);assertThrows(IllegalArgumentException.class,f::validate);f.setCandidateCount(100);f.setFinalNumber(9);assertDoesNotThrow(f::validate);f.setDateOfBirth("2024-02-30");assertThrows(IllegalArgumentException.class,f::validate);}
  @Test @WithMockUser void candidateCountDefaultsToOneHundredAndCannotExceedFiveHundred()throws Exception{
   mvc.perform(get("/")).andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("max=\"500\""))).andExpect(content().string(org.hamcrest.Matchers.containsString("value=\"100\"")));
-  mvc.perform(post("/suggestions").with(csrf()).param("dateOfBirth","1992-07-03").param("startLetter","P").param("surname","Saikiran").param("language","Tamil").param("gender","Male").param("candidateCount","501"))
+  mvc.perform(post("/suggestions").with(csrf()).param("dateOfBirth","1992-07-03").param("timeOfBirth","13:49").param("startLetter","P").param("surname","Saikiran").param("language","Tamil").param("gender","Male").param("candidateCount","501"))
    .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Candidate count must be from 1 to 500.")));
   verifyNoInteractions(online);
  }
@@ -45,6 +45,18 @@ class ApplicationTests {
   assertEquals(1,catalogue.searchWithInternet(f,remote).names().size());
   verify(remote).find("Tamil","Male","P",500);
  }
+ @Test void timeOfBirthMustBeProvidedAndValid(){
+  SearchForm f=form();f.setTimeOfBirth("");assertThrows(IllegalArgumentException.class,f::validate);
+  f.setTimeOfBirth("25:00");assertThrows(IllegalArgumentException.class,f::validate);
+  f.setTimeOfBirth("13:49");assertDoesNotThrow(f::validate);
+ }
+ @Test void customerPdfUsesTwelveHourClockAtMidnightAndNoon()throws Exception{
+  var row=new CatalogueService.Suggestion("Pranav","Sacred sound","Male","Test",3,"Pranav Saikiran","");
+  SearchForm f=form();f.setTimeOfBirth("00:01");
+  try(var pdf=Loader.loadPDF(export.customerPdf(List.of(row),f))){assertTrue(new PDFTextStripper().getText(pdf).contains("Time of Birth: 12:01 AM IST"));}
+  f.setTimeOfBirth("12:00");
+  try(var pdf=Loader.loadPDF(export.customerPdf(List.of(row),f))){assertTrue(new PDFTextStripper().getText(pdf).contains("Time of Birth: 12:00 PM IST"));}
+ }
  @Test void exportsContainRealData()throws Exception{var f=form();var remote=mock(OnlineNameService.class);when(remote.find("Tamil","Male","P",100)).thenReturn(new OnlineNameService.Result(sourceNames(60),"live"));var rows=catalogue.searchWithInternet(f,remote).names();try(var pdf=Loader.loadPDF(export.pdf(rows,f))){String text=new PDFTextStripper().getText(pdf);assertTrue(text.contains(rows.get(0).combinedName()));assertTrue(text.contains("Language:"));assertTrue(text.contains("Starting Pattern:"));assertTrue(text.contains("Surname:"));assertTrue(text.contains("Name Order:"));assertTrue(text.contains("Date of Birth:"));assertTrue(text.contains("Gender:"));assertTrue(text.contains("Final Number:"));assertTrue(text.contains("S.No."));assertTrue(text.contains("1992-07-03"));assertTrue(pdf.getNumberOfPages()>1);var pageTwo=new PDFTextStripper();pageTwo.setStartPage(2);pageTwo.setEndPage(2);String continuation=pageTwo.getText(pdf).stripLeading();assertFalse(continuation.contains("Name Suggestions"));var lastPage=new PDFTextStripper();lastPage.setStartPage(pdf.getNumberOfPages());lastPage.setEndPage(pdf.getNumberOfPages());assertTrue(lastPage.getText(pdf).contains(rows.get(59).combinedName()));}try(var xls=new XSSFWorkbook(new ByteArrayInputStream(export.excel(rows,f)))){assertEquals(1,xls.getSheetAt(0).getRow(10).getCell(0).getNumericCellValue());assertEquals(rows.get(0).combinedName(),xls.getSheetAt(0).getRow(10).getCell(1).getStringCellValue());}}
  @Test void customerPdfPlacesNameTableCloseToItsDetails()throws Exception{
   SearchForm f=form();var remote=mock(OnlineNameService.class);when(remote.find("Tamil","Male","P",100)).thenReturn(new OnlineNameService.Result(sourceNames(1),"live"));
@@ -53,15 +65,15 @@ class ApplicationTests {
    var stripper=new PDFTextStripper(){@Override protected void writeString(String text,List<TextPosition> positions)throws IOException{if(!positions.isEmpty())y.put(text.trim(),positions.get(0).getYDirAdj());super.writeString(text,positions);}};
    stripper.getText(pdf);
   }
-  assertTrue(y.containsKey("Date of Birth:"));assertTrue(y.containsKey("S.No."));
-  assertTrue(Math.abs(y.get("S.No.")-y.get("Date of Birth:"))<60f,"Customer details and names should remain visually close");
+  assertTrue(y.containsKey("Date of Birth:"));assertTrue(y.containsKey("Natchathiram:"));assertTrue(y.containsKey("S.No."));
+  assertTrue(Math.abs(y.get("S.No.")-y.get("Natchathiram:"))<60f,"Customer details and names should remain visually close");
  }
  @Test void anonymousCannotAccessApp()throws Exception{mvc.perform(get("/")).andExpect(status().is3xxRedirection());mvc.perform(get("/login")).andExpect(status().isOk());mvc.perform(post("/register").param("username","test").param("password","longpassword")).andExpect(status().isForbidden());}
  @Test void registrationAndLogin()throws Exception{mvc.perform(post("/register").with(csrf()).param("username","tester").param("password","testpassword123")).andExpect(redirectedUrl("/login?registered"));mvc.perform(post("/login").with(csrf()).param("username","tester").param("password","testpassword123")).andExpect(redirectedUrl("/"));}
  @Test @WithMockUser void thymeleafFlowsAndExport()throws Exception{
   when(online.find("Tamil","Male","P",100)).thenReturn(new OnlineNameService.Result(sourceNames(1),"live"));
   mvc.perform(get("/")).andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Find a name")));
-  var response=mvc.perform(post("/suggestions").with(csrf()).param("dateOfBirth","1992-07-03").param("startLetter","P").param("surname","Saikiran").param("language","Tamil").param("gender","Male"))
+  var response=mvc.perform(post("/suggestions").with(csrf()).param("dateOfBirth","1992-07-03").param("timeOfBirth","13:49").param("startLetter","P").param("surname","Saikiran").param("language","Tamil").param("gender","Male"))
    .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("matching names")))
    .andExpect(content().string(org.hamcrest.Matchers.containsString("Sarvam AI")))
    .andExpect(content().string(org.hamcrest.Matchers.containsString("Download User PDF")))
@@ -72,7 +84,7 @@ class ApplicationTests {
   var userPdf=mvc.perform(get("/export/user-pdf").session(session)).andExpect(status().isOk()).andExpect(content().contentType("application/pdf")).andReturn();
   try(var pdf=Loader.loadPDF(userPdf.getResponse().getContentAsByteArray())){String text=new PDFTextStripper().getText(pdf);assertTrue(text.contains("Language:"));assertTrue(text.contains("Starting Pattern:"));assertTrue(text.contains("Name Order:"));assertTrue(text.contains("Final Number:"));}
   var customerPdf=mvc.perform(get("/export/customer-pdf").session(session)).andExpect(status().isOk()).andExpect(content().contentType("application/pdf")).andReturn();
-  try(var pdf=Loader.loadPDF(customerPdf.getResponse().getContentAsByteArray())){String text=new PDFTextStripper().getText(pdf);assertTrue(text.contains("Surname: Saikiran"));assertTrue(text.contains("Gender: Male"));assertTrue(text.contains("Date of Birth: 1992-07-03"));assertFalse(text.contains("Language:"));assertFalse(text.contains("Starting Pattern:"));assertFalse(text.contains("Name Order:"));assertFalse(text.contains("Final Number:"));assertTrue(text.contains("PA Saikiran"));}
+  try(var pdf=Loader.loadPDF(customerPdf.getResponse().getContentAsByteArray())){String text=new PDFTextStripper().getText(pdf);assertTrue(text.contains("Surname: Saikiran"));assertTrue(text.contains("Gender: Male"));assertTrue(text.contains("Date of Birth: 03/07/1992"));assertTrue(text.contains("Time of Birth: 01:49 PM IST"));assertTrue(text.contains("Raasi: Kadagam"));assertTrue(text.contains("Natchathiram: Ayilyam"));assertFalse(text.contains("Language:"));assertFalse(text.contains("Starting Pattern:"));assertFalse(text.contains("Name Order:"));assertFalse(text.contains("Final Number:"));assertTrue(text.contains("PA Saikiran"));}
   mvc.perform(post("/calculator").with(csrf()).param("firstName","Pranav").param("surname","Saikiran")).andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Pranav Saikiran")));
  }
  @Test @WithMockUser void badNumberHandledWithoutServerError()throws Exception{mvc.perform(post("/suggestions").with(csrf()).param("finalNumber","abc")).andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Final number must")));}
