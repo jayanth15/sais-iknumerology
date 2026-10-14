@@ -63,3 +63,111 @@
 /* Starting letters apply to Sarvam only; visually indicate Excel mode is disabled. */
 #startLetter:disabled {background:#edf1ee;color:#88988e;border-color:#d7e0d9;cursor:not-allowed;opacity:1;}
 #startLetterHelp {display:block;margin-top:6px;font-size:12px;line-height:1.4;}
+
+/* Raasi / Natchathiram / Pada separate results page. */
+.raasi-form-grid {grid-template-columns:repeat(3,minmax(0,1fr))}
+.raasi-form-grid label {min-width:0}
+.raasi-result {border-color:#badbca}
+.raasi-result-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:20px 0 24px}
+.raasi-metric {padding:18px;background:#edf7ef;border:1px solid #cee6d4;border-radius:14px;display:flex;flex-direction:column;gap:4px}
+.raasi-metric small {font-size:12px;font-weight:700}
+.raasi-metric strong {font-size:25px;color:#104e38}
+.raasi-metric span {font-size:14px;color:#557166}
+.raasi-details th {width:42%;font-weight:650;color:#304a3d}
+.raasi-details td {word-break:break-word}
+@media(max-width:700px){.raasi-form-grid,.raasi-result-grid{grid-template-columns:1fr}.raasi-metric strong{font-size:22px}}
+
+/* Modern, mobile-friendly birth details controls for the Raasi calculator. */
+.raasi-form-grid{gap:18px;align-items:start}
+.raasi-field{min-width:0;padding:16px;border:1px solid #dce9df;border-radius:15px;background:linear-gradient(135deg,#fbfefb,#f4faf5);min-height:177px}
+.raasi-field-heading{display:block;font-size:13px;font-weight:750;color:#244e3b;line-height:1.45}
+.raasi-field-heading span{font-weight:550;color:#698978}
+.raasi-field-help{display:block;font-size:11.5px;line-height:1.5;margin-top:10px;color:#667e70}
+.raasi-field .dob-input-row,.raasi-field .birth-time-native,.raasi-field #raasiPlace{margin-top:13px}
+.raasi-field #raasiPlace,.raasi-field .birth-time-native{height:49px;border-radius:11px;padding:12px 13px;background:#fff}
+.raasi-field .dob-popover{width:min(345px,calc(100vw - 64px))}
+.birth-time-enhanced[hidden]{display:none!important}
+.birth-time-row{display:flex;align-items:end;gap:5px;margin-top:12px}
+.birth-time-part{display:block;flex:1 1 0;min-width:0;font-size:11px;color:#6a8276;font-weight:700}
+.birth-time-part span{display:block;margin-bottom:5px;padding-left:2px}
+.birth-time-part select{display:block;width:100%;height:49px;margin:0;padding:9px 4px 9px 8px;border:1px solid #b6cebd;border-radius:10px;font-size:17px;font-weight:750;font-variant-numeric:tabular-nums;color:#1e503a;background:#fff;cursor:pointer}
+.birth-time-colon{font-weight:750;font-size:20px;color:#527763;align-self:end;line-height:49px}
+.birth-period{display:grid;grid-template-columns:1fr 1fr;gap:3px;flex:1.15 1 0;min-width:0;margin:0 0 0 3px;border:0;padding:0;background:none}
+.birth-period legend{float:none;margin:0 0 5px;font-size:11px;line-height:16px;color:#6a8276;font-weight:700}
+.birth-period-option{position:relative;display:block;cursor:pointer;min-width:0}
+.birth-period-option input{position:absolute;opacity:0;width:1px;height:1px;margin:0;left:50%;top:50%}
+.birth-period-option span{display:grid;place-items:center;height:49px;padding:0 4px;background:#fff;color:#507362;font-weight:750;font-size:13px;border:1px solid #b6cebd;border-radius:9px;transition:background .12s ease,border-color .12s ease}
+.birth-period-option input:checked + span{background:#145c48;color:white;border-color:#145c48;box-shadow:0 3px 10px #145c4826}
+.birth-period-option input:focus-visible + span{outline:3px solid #8fcfac;outline-offset:2px}
+.birth-time-part select:focus-visible{outline:3px solid #8fcfac;outline-offset:2px}
+.birth-time-live{margin-top:8px;min-height:20px;color:#7a8b7e;font-size:12px;font-weight:600}
+.birth-time-live.is-set{color:#176547}
+@media(min-width:701px) and (max-width:1010px){.raasi-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.raasi-place-field{grid-column:span 2}}
+@media(max-width:700px){.raasi-field{min-height:0;padding:15px}.raasi-form-grid{gap:13px}.raasi-field .dob-popover{width:min(345px,calc(100vw - 85px))}}
+
+/* Birth-date numerology results: intentionally separate from astronomical Raasi metrics. */
+.raasi-numerology{margin:22px 0 24px}
+.raasi-numerology-heading h3{font-size:20px;margin:0 0 5px}
+.raasi-numerology-heading h3 span{font-weight:600}
+.raasi-numerology-heading p{margin:0 0 14px;color:#557166;font-size:13px}
+.raasi-number-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.raasi-number-card{background:#f5f6fc;border:1px solid #d9deed;border-radius:16px;padding:18px;min-width:0}
+.raasi-number-label{font-size:14px;font-weight:750;color:#304665}
+.raasi-number-value{font-size:44px;line-height:1.15;font-weight:850;color:#23396a;margin:10px 0}
+.raasi-number-description{font-size:13px;color:#51617e;margin-bottom:12px}
+.raasi-number-working{font-variant-numeric:tabular-nums;background:white;border:1px solid #e1e5f0;border-radius:10px;padding:11px 12px;font-size:14px;line-height:1.7;font-weight:600;color:#273b66;overflow-wrap:anywhere}
+@media(max-width:700px){.raasi-number-grid{grid-template-columns:1fr;gap:12px}.raasi-number-card{padding:16px}.raasi-number-value{font-size:38px}}
+
+/* Friendly numbers reference beneath the DOB numerology calculations. */
+.raasi-friendly{margin-top:20px;padding-top:18px;border-top:1px solid #e1e8ed}
+.raasi-friendly-heading h3{font-size:19px;line-height:1.4;margin:0 0 4px;color:#233c43}
+.raasi-friendly-heading h3 span{font-weight:600}
+.raasi-friendly-heading p{margin:0 0 12px;font-size:13px;color:#557166}
+.raasi-friendly-table{width:100%;max-width:620px;border:1px solid #d9e4dd;border-radius:12px;border-collapse:separate;border-spacing:0;overflow:hidden;background:#fff}
+.raasi-friendly-table th,.raasi-friendly-table td{padding:10px 15px;font-size:14px;border-bottom:1px solid #e3e9e1}
+.raasi-friendly-table thead th{background:#eff5f0;font-weight:750;color:#304a3d}
+.raasi-friendly-table thead th span{font-weight:500}
+.raasi-friendly-table tbody th{background:transparent;font-variant-numeric:tabular-nums;width:50%;font-weight:650}
+.raasi-friendly-table tbody tr:last-child th,.raasi-friendly-table tbody tr:last-child td{border-bottom:0}
+.raasi-friendly-table tbody tr.is-current th,.raasi-friendly-table tbody tr.is-current td{background:#e2f3e5;color:#124b34;font-weight:850}
+.raasi-friendly-table tbody tr.is-current th{box-shadow:inset 4px 0 0 #247451}
+.raasi-friendly-note{font-size:12px;color:#64796e;margin:10px 0 0}
+@media(max-width:700px){.raasi-friendly-table th,.raasi-friendly-table td{padding:11px 9px;font-size:13px}.raasi-friendly-table thead th span{display:block;font-size:11px}}
+
+/* Selected Friendly En: strong color and text markers, including on small screens. */
+.raasi-friendly-summary{display:grid;gap:6px;margin:20px 0 4px;padding:15px 18px;border:2px solid #176b48;border-radius:14px;background:#ecf8ef;color:#124b34}
+.raasi-friendly-summary-label{font-size:13px;font-weight:750}
+.raasi-friendly-summary-label span{font-weight:600}
+.raasi-friendly-summary-result{font-weight:650;font-size:17px;line-height:1.7}
+.raasi-friendly-summary-result strong{display:inline-block;min-width:34px;text-align:center;padding:1px 7px;font-weight:900;font-size:22px;color:#0d4e2f;background:#ccebd5;border-radius:7px}
+.raasi-friendly-arrow{display:inline-block;padding:0 8px;font-size:22px;font-weight:800}
+.raasi-friendly-summary small{color:#245c45;font-size:12px}
+.raasi-friendly-table tbody tr.is-current th,.raasi-friendly-table tbody tr.is-current td,.raasi-friendly-table tbody tr[aria-current="true"] th,.raasi-friendly-table tbody tr[aria-current="true"] td{background:#c7eecf!important;color:#073f27!important;font-weight:900!important;border-top:2px solid #238656;border-bottom:2px solid #238656}
+.raasi-friendly-table tbody tr.is-current th,.raasi-friendly-table tbody tr[aria-current="true"] th{border-left:6px solid #176b48}
+.raasi-friendly-selected{display:inline-block;margin-left:12px;padding:3px 8px;background:#145b3b;color:white;border-radius:6px;font-size:11px;font-weight:800;white-space:nowrap}
+@media(max-width:480px){.raasi-friendly-selected{display:block;width:max-content;max-width:100%;margin:5px 0 0}.raasi-friendly-summary-result{font-size:15px}.raasi-friendly-summary-result strong{font-size:19px}.raasi-friendly-arrow{padding:0 4px}}
+
+/* Four-pada naming letters: visibly distinguish the exact current pada. */
+.raasi-pada-letters{margin-top:24px;padding-top:22px;border-top:1px solid #dbe5e0}
+.raasi-pada-letters-heading h3{font-size:19px;line-height:1.4;margin:0 0 5px;color:#233c43}
+.raasi-pada-letters-heading h3 span{font-weight:600}
+.raasi-pada-letters-heading p{font-size:13px;color:#557166;margin:0 0 14px}
+.raasi-pada-letters-summary{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:#e9f6ee;border:2px solid #176b48;border-radius:14px;padding:16px 19px;margin-bottom:15px}
+.raasi-pada-letters-summary>div:first-child{display:grid;gap:5px}
+.raasi-pada-letters-summary small{color:#365e4a;font-weight:700}
+.raasi-pada-letters-summary strong{color:#11452f;font-size:18px;line-height:1.5}
+.raasi-pada-letters-current{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.raasi-pada-letters-tamil{font-size:30px;font-weight:900;color:#06472c;background:white;border:1px solid #b5dcc3;padding:7px 15px;border-radius:10px}
+.raasi-pada-letters-english{font-size:20px;font-weight:850;color:#06472c;overflow-wrap:anywhere}
+.raasi-pada-letters-table{width:100%;max-width:760px;border:1px solid #d9e4dd;border-radius:12px;border-collapse:separate;border-spacing:0;overflow:hidden;background:#fff}
+.raasi-pada-letters-table th,.raasi-pada-letters-table td{padding:13px 15px;border-bottom:1px solid #e3e9e1;text-align:left;vertical-align:middle;font-size:14px}
+.raasi-pada-letters-table thead th{background:#eff5f0;color:#304a3d;font-weight:750}
+.raasi-pada-letters-table tbody th{width:31%;font-weight:650}
+.raasi-pada-letters-table tbody td[lang=ta]{font-size:21px;min-width:84px}
+.raasi-pada-letters-table tbody tr:last-child th,.raasi-pada-letters-table tbody tr:last-child td{border-bottom:0}
+.raasi-pada-letters-table tbody tr.is-current th,.raasi-pada-letters-table tbody tr.is-current td,.raasi-pada-letters-table tbody tr[aria-current=true] th,.raasi-pada-letters-table tbody tr[aria-current=true] td{background:#c7eecf!important;color:#073f27!important;font-weight:900!important;border-top:2px solid #238656;border-bottom:2px solid #238656}
+.raasi-pada-letters-table tbody tr.is-current th,.raasi-pada-letters-table tbody tr[aria-current=true] th{border-left:6px solid #176b48}
+.raasi-pada-selected{display:block;width:max-content;max-width:100%;margin-top:5px;padding:3px 7px;border-radius:6px;background:#145b3b;color:white;font-size:11px;font-weight:800;line-height:1.4}
+.raasi-pada-letters-note{font-size:12px;color:#64796e;margin:12px 0 0;line-height:1.6}
+.raasi-pada-letters-warning{font-size:13px;color:#835408;background:#fff8e8;border:1px solid #e8c77b;border-radius:10px;padding:12px 15px;line-height:1.6;margin:12px 0 0}
+@media(max-width:600px){.raasi-pada-letters-summary{padding:13px;align-items:flex-start}.raasi-pada-letters-summary strong{font-size:16px}.raasi-pada-letters-tamil{font-size:26px}.raasi-pada-letters-english{font-size:17px}.raasi-pada-letters-table th,.raasi-pada-letters-table td{padding:11px 8px;font-size:12px}.raasi-pada-letters-table tbody th{width:36%}.raasi-pada-letters-table tbody td[lang=ta]{font-size:19px;min-width:50px}.raasi-pada-letters-table thead th span{display:block;font-size:11px}}

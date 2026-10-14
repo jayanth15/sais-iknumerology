@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Raasi · Natchathiram · Pada · Birth Numbers | IK's Numerology</title>
+  <link rel="stylesheet" th:href="@{/style.css(v='20261014-nakshatra-padas-1')}">
+  <script defer th:src="@{/date-picker.js}"></script>
+  <script defer th:src="@{/birth-time-picker.js}"></script>
+</head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+  <div class="eyebrow">Traditional Tamil birth-star calculation</div>
+  <h1>Raasi, Natchathiram, Pada &amp; Birth Numbers</h1>
+  <p class="intro">Enter your birth date, exact birth time and place in India to calculate the Moon's birth sign, nakshatra and quarter (பாதம்). Results appear in English and Tamil, including விதி எண் and மதி எண் calculated from your birth date.</p>
+  <div class="error" role="alert" th:if="${error}" th:text="${error}"></div>
+  <form class="card" th:action="@{/raasi}" method="post">
+    <h2>Birth details / பிறப்பு விவரங்கள்</h2>
+    <div class="grid raasi-form-grid">
+      <div class="raasi-field raasi-date-field">
+        <label class="raasi-field-heading" for="raasiDob">Date of birth <span lang="ta">/ பிறந்த தேதி</span></label>
+        <div class="dob-picker" data-dob-picker>
+          <input id="raasiDob" class="dob-native" type="date" name="dateOfBirth" min="1950-01-01" required th:value="${dateOfBirth}" aria-describedby="raasiDateHelp">
+          <div class="dob-enhanced" hidden>
+            <div class="dob-input-row">
+              <input class="dob-text" type="text" inputmode="numeric" autocomplete="bday" placeholder="DD / MM / YYYY" maxlength="10" required aria-label="Date of birth in DD/MM/YYYY format" aria-describedby="raasiDateHelp">
+              <button type="button" class="dob-trigger" aria-label="Open birth date calendar" aria-expanded="false" aria-haspopup="dialog" title="Choose date in calendar">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/><path d="M8 14h2v2H8zM14 14h2v2h-2z"/></svg>
+              </button>
+            </div>
+            <div class="dob-popover" role="dialog" aria-label="Choose your birth date" hidden>
+              <div class="dob-popover-title"><span>Choose birth date</span><button type="button" class="dob-close" aria-label="Close calendar">&#215;</button></div>
+              <div class="dob-quick-jump">
+                <label class="dob-select-group">Month<select class="dob-month" aria-label="Choose month"></select></label>
+                <label class="dob-select-group">Year<select class="dob-year" aria-label="Choose year"></select></label>
+              </div>
+              <div class="dob-month-navigation">
+                <button type="button" class="dob-prev" aria-label="Previous month">&#8249;</button><span class="dob-month-title" aria-live="polite"></span>
+                <button type="button" class="dob-next" aria-label="Next month">&#8250;</button>
+              </div>
+              <div class="dob-weekdays" aria-hidden="true"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+              <div class="dob-days" role="grid" aria-label="Days of selected month"></div>
+              <div class="dob-popover-footer"><button type="button" class="dob-clear">Clear</button><button type="button" class="dob-today">Today</button></div>
+            </div>
+          </div>
+        </div>
+        <small id="raasiDateHelp" class="raasi-field-help">Tap the calendar or type DD/MM/YYYY (1950 onwards)</small>
+      </div>
+      <div class="raasi-field raasi-time-field" data-time-picker>
+        <label class="raasi-field-heading" for="raasiTime">Time of birth <span lang="ta">/ பிறந்த நேரம்</span></label>
+        <input id="raasiTime" class="birth-time-native" type="time" name="timeOfBirth" step="60" required th:value="${timeOfBirth}" aria-describedby="raasiTimeHelp">
+        <div class="birth-time-enhanced" hidden>
+          <div class="birth-time-row" role="group" aria-label="Choose time of birth in 12 hour format">
+            <label class="birth-time-part" for="birthHour"><span>Hour</span><select id="birthHour" class="birth-hour" required aria-label="Birth hour"></select></label>
+            <span class="birth-time-colon" aria-hidden="true">:</span>
+            <label class="birth-time-part" for="birthMinute"><span>Minute</span><select id="birthMinute" class="birth-minute" required aria-label="Birth minute"></select></label>
+            <fieldset class="birth-period" aria-label="AM or PM"><legend>Period</legend>
+              <label class="birth-period-option"><input type="radio" name="timeDisplayPeriod" value="AM" checked><span>AM</span></label>
+              <label class="birth-period-option"><input type="radio" name="timeDisplayPeriod" value="PM"><span>PM</span></label>
+            </fieldset>
+          </div>
+          <div class="birth-time-live" aria-live="polite">Choose an hour and minute</div>
+        </div>
+        <small id="raasiTimeHelp" class="raasi-field-help">Select exact hour, minute and AM/PM · India Standard Time</small>
+      </div>
+      <div class="raasi-field raasi-place-field">
+        <label class="raasi-field-heading" for="raasiPlace">Place of birth <span lang="ta">/ பிறந்த இடம்</span></label>
+        <input id="raasiPlace" type="text" name="placeOfBirth" placeholder="Kanchipuram, Chennai…" autocomplete="address-level2" maxlength="120" required th:value="${placeOfBirth}">
+        <small class="raasi-field-help">Enter city or town in India</small>
+      </div>
+    </div>
+    <small class="dob-help">Indian locations only: the birth time is interpreted as IST (UTC+05:30). The Moon sign is geocentric; place does not change the result within the same timezone. For births outside India, do not use this screen.</small>
+    <div class="actions"><button type="submit">Generate details →</button> <a th:href="@{/raasi}">Clear</a></div>
+  </form>
+
+  <section class="card raasi-result" th:if="${birthResult != null}" aria-live="polite">
+    <div class="eyebrow">Your result / உங்கள் நட்சத்திரம்</div>
+    <h2 th:text="${birthResult.raasiTamil + ' ராசி · ' + birthResult.natchathiramTamil + ' நட்சத்திரம்'}">Birth sign</h2>
+    <div class="raasi-result-grid">
+      <div class="raasi-metric"><small>Raasi / ராசி</small><strong th:text="${birthResult.raasiTamil}"></strong><span th:text="${birthResult.raasi}"></span></div>
+      <div class="raasi-metric"><small>Natchathiram / நட்சத்திரம்</small><strong th:text="${birthResult.natchathiramTamil}"></strong><span th:text="${birthResult.natchathiram}"></span></div>
+      <div class="raasi-metric"><small>Pada / பாதம்</small><strong th:text="${birthResult.pada + 'ஆம் பாதம்'}"></strong><span th:text="${'Pada ' + birthResult.pada}"></span></div>
+    </div>
+    <section class="raasi-numerology" aria-labelledby="birthNumerologyTitle">
+      <div class="raasi-numerology-heading">
+        <h3 id="birthNumerologyTitle">Birth date numbers <span lang="ta">/ பிறந்த தேதி எண்கள்</span></h3>
+        <p>Calculated from your date of birth (DD/MM/YYYY); time and place do not affect these numbers.</p>
+      </div>
+      <div class="raasi-number-grid">
+        <div class="raasi-number-card">
+          <div class="raasi-number-label">Vithi En <span lang="ta">/ விதி எண்</span></div>
+          <div class="raasi-number-value" th:text="${birthResult.vithiEn}">4</div>
+          <div class="raasi-number-description">Sum all DOB digits, then reduce to one digit</div>
+          <div class="raasi-number-working" th:text="${birthResult.vithiCalculation}">0 + 3 + 0 + 7 + 1 + 9 + 9 + 2 = 31 → 3 + 1 = 4</div>
+        </div>
+        <div class="raasi-number-card">
+          <div class="raasi-number-label">Mathi En <span lang="ta">/ மதி எண்</span></div>
+          <div class="raasi-number-value" th:text="${birthResult.mathiEn}">3</div>
+          <div class="raasi-number-description">Sum only the birth-day digits, then reduce to one digit</div>
+          <div class="raasi-number-working" th:text="${birthResult.mathiCalculation}">0 + 3 = 3</div>
+        </div>
+      </div>
+      <div class="raasi-friendly-summary" role="status" aria-live="polite">
+        <span class="raasi-friendly-summary-label">Your friendly number <span lang="ta">/ உங்கள் நட்பு எண்</span></span>
+        <span class="raasi-friendly-summary-result">Vithi En <strong th:text="${birthResult.vithiEn}">4</strong><span class="raasi-friendly-arrow" aria-hidden="true">→</span>Friendly En <strong th:text="${#strings.isEmpty(birthResult.friendlyEn) ? 'Not specified' : birthResult.friendlyEn}">1</strong></span>
+        <small>Look for the <strong>✓ Your Vithi En</strong> label in the highlighted row below.</small>
+      </div>
+      <section class="raasi-friendly" aria-labelledby="raasiFriendlyTitle">
+        <div class="raasi-friendly-heading">
+          <h3 id="raasiFriendlyTitle">Vithi En &amp; Friendly En <span lang="ta">/ விதி எண் &amp; நட்பு எண்</span></h3>
+          <p>The highlighted row corresponds to your calculated Vithi En.</p>
+        </div>
+        <div class="table-wrap">
+          <table class="raasi-friendly-table">
+            <thead><tr><th scope="col">Vithi En <span lang="ta">/ விதி எண்</span></th><th scope="col">Friendly En <span lang="ta">/ நட்பு எண்</span></th></tr></thead>
+            <tbody>
+            <tr th:classappend="${birthResult.vithiEn == 1} ? 'is-current' : ''" th:attr="aria-current=${birthResult.vithiEn == 1} ? 'true' : null"><th scope="row">1<span class="raasi-friendly-selected" th:if="${birthResult.vithiEn == 1}">✓ Your Vithi En</span></th><td>4</td></tr>
+            <tr th:classappend="${birthResult.vithiEn == 2} ? 'is-current' : ''" th:attr="aria-current=${birthResult.vithiEn == 2} ? 'true' : null"><th scope="row">2<span class="raasi-friendly-selected" th:if="${birthResult.vithiEn == 2}">✓ Your Vithi En</span></th><td>7</td></tr>
+            <tr th:classappend="${birthResult.vithiEn == 3} ? 'is-current' : ''" th:attr="aria-current=${birthResult.vithiEn == 3} ? 'true' : null"><th scope="row">3<span class="raasi-friendly-selected" th:if="${birthResult.vithiEn == 3}">✓ Your Vithi En</span></th><td>9</td></tr>
+            <tr th:classappend="${birthResult.vithiEn == 4} ? 'is-current' : ''" th:attr="aria-current=${birthResult.vithiEn == 4} ? 'true' : null"><th scope="row">4<span class="raasi-friendly-selected" th:if="${birthResult.vithiEn == 4}">✓ Your Vithi En</span></th><td>1</td></tr>
+            <tr th:classappend="${birthResult.vithiEn == 5} ? 'is-current' : ''" th:attr="aria-current=${birthResult.vithiEn == 5} ? 'true' : null"><th scope="row">5<span class="raasi-friendly-selected" th:if="${birthResult.vithiEn == 5}">✓ Your Vithi En</span></th><td>9</td></tr>
+            <tr th:classappend="${birthResult.vithiEn == 6} ? 'is-current' : ''" th:attr="aria-current=${birthResult.vithiEn == 6} ? 'true' : null"><th scope="row">6<span class="raasi-friendly-selected" th:if="${birthResult.vithiEn == 6}">✓ Your Vithi En</span></th><td>9</td></tr>
+            <tr th:classappend="${birthResult.vithiEn == 7} ? 'is-current' : ''" th:attr="aria-current=${birthResult.vithiEn == 7} ? 'true' : null"><th scope="row">7<span class="raasi-friendly-selected" th:if="${birthResult.vithiEn == 7}">✓ Your Vithi En</span></th><td>2</td></tr>
+            <tr th:classappend="${birthResult.vithiEn == 8} ? 'is-current' : ''" th:attr="aria-current=${birthResult.vithiEn == 8} ? 'true' : null"><th scope="row">8<span class="raasi-friendly-selected" th:if="${birthResult.vithiEn == 8}">✓ Your Vithi En</span></th><td>5,6</td></tr>
+            <tr th:classappend="${birthResult.vithiEn == 9} ? 'is-current' : ''" th:attr="aria-current=${birthResult.vithiEn == 9} ? 'true' : null"><th scope="row">9<span class="raasi-friendly-selected" th:if="${birthResult.vithiEn == 9}">✓ Your Vithi En</span></th><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="raasi-friendly-note">Friendly En for Vithi En 9 is left blank as specified.</p>
+      </section>
+      <section class="raasi-pada-letters" aria-labelledby="raasiPadaLettersTitle">
+        <div class="raasi-pada-letters-heading">
+          <h3 id="raasiPadaLettersTitle">Nakshatra Pada Naming Letters <span lang="ta">/ நட்சத்திர பாத எழுத்துக்கள்</span></h3>
+          <p>All four padas of your calculated nakshatra, copied from the uploaded Tamil–English mapping workbook.</p>
+        </div>
+        <div class="raasi-pada-letters-summary" role="status">
+          <div>
+            <small>Your Nakshatra &amp; Pada <span lang="ta">/ உங்கள் நட்சத்திரம் &amp; பாதம்</span></small>
+            <strong th:text="${birthResult.natchathiramTamil + ' (' + birthResult.natchathiram + ') · Pada ' + birthResult.pada}">ஆயில்யம் (Ayilyam) · Pada 4</strong>
+          </div>
+          <div class="raasi-pada-letters-current">
+            <span class="raasi-pada-letters-tamil" lang="ta" th:text="${birthResult.padaLetters[birthResult.pada - 1].tamil}">டோ</span>
+            <span class="raasi-pada-letters-english" th:text="${birthResult.padaLetters[birthResult.pada - 1].english}">Do</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="raasi-pada-letters-table">
+            <thead>
+              <tr><th scope="col">Pada <span lang="ta">/ பாதம்</span></th><th scope="col">Tamil letters <span lang="ta">/ தமிழ்</span></th><th scope="col">English naming letters</th></tr>
+            </thead>
+            <tbody>
+              <tr th:each="letter : ${birthResult.padaLetters}"
+                  th:classappend="${letter.pada == birthResult.pada} ? 'is-current' : ''"
+                  th:attr="aria-current=${letter.pada == birthResult.pada} ? 'true' : null">
+                <th scope="row">
+                  <span th:text="${'Pada ' + letter.pada}">Pada 1</span>
+                  <span class="raasi-pada-selected" th:if="${letter.pada == birthResult.pada}">✓ Your Pada / உங்கள் பாதம்</span>
+                </th>
+                <td lang="ta" th:text="${letter.tamil}">டி</td>
+                <td th:text="${letter.english}">De/Di</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="raasi-pada-letters-note">English alternatives are shown exactly as supplied (separated by “/”). These are traditional naming syllables, not Chaldean numeric values.</p>
+        <p class="raasi-pada-letters-warning" th:if="${birthResult.padaLettersUnverified}" role="alert">
+          <strong>Mapping needs verification:</strong> The supplied workbook marks this nakshatra (Poosam) as UNVERIFIED; its Tamil/English pada alignment may be inconsistent. The letters above are reproduced from the workbook, not independently confirmed.
+        </p>
+        <p class="raasi-pada-letters-warning" th:if="${birthResult.nearPadaBoundary}" role="note">
+          Your calculated pada is near a boundary; a more precise ephemeris or corrected birth time may change which row is selected.
+        </p>
+      </section>
+    </section>
+    <div class="table-wrap">
+      <table class="raasi-details"><tbody>
+        <tr><th scope="row">Date / Time</th><td th:text="${#temporals.format(birthResult.dateOfBirth,'dd MMMM yyyy') + ' · ' + #temporals.format(birthResult.timeOfBirth,'hh:mm a') + ' IST'}"></td></tr>
+        <tr><th scope="row">Birth place</th><td th:text="${birthResult.placeOfBirth}"></td></tr>
+        <tr><th scope="row">Raasi lord</th><td th:text="${birthResult.raasiLord}"></td></tr>
+        <tr><th scope="row">Nakshatra lord</th><td th:text="${birthResult.nakshatraLord}"></td></tr>
+        <tr><th scope="row">Naming letters (from supplied workbook)</th><td th:text="${birthResult.namingSyllable}"></td></tr>
+        <tr><th scope="row">Sidereal Moon longitude</th><td th:text="${#numbers.formatDecimal(birthResult.moonLongitudeDegrees,1,4) + '°'}"></td></tr>
+        <tr><th scope="row">Ayanamsa</th><td th:text="${#numbers.formatDecimal(birthResult.ayanamsaDegrees,1,4) + '° (approx.)'}"></td></tr>
+      </tbody></table>
+    </div>
+    <div class="error" th:if="${birthResult.nearPadaBoundary}" role="alert"><strong>Near pada boundary:</strong> <span th:text="${birthResult.note}"></span></div>
+    <p class="muted" th:unless="${birthResult.nearPadaBoundary}" th:text="${birthResult.note}"></p>
+    <p class="muted"><strong>Method:</strong> <span th:text="${birthResult.method}"></span>. The analytical Moon model is approximate, not a full Swiss/JPL ephemeris. Different ayanamsas and Vakya Panchangam may produce different boundaries; if near a changeover, verify using a high-precision source.</p>
+  </section>
+  <footer th:replace="~{fragments :: footer}"></footer>
+</main>
+</body>
+</html>

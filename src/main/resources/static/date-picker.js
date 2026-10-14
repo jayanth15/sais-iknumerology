@@ -20,7 +20,7 @@
   const todayButton = root.querySelector('.dob-today');
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const minYear = 1900;
+  const minYear = native.min && /^\d{4}-\d{2}-\d{2}$/.test(native.min) ? Number(native.min.slice(0,4)) : 1900;
   const months = ['January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'];
   const pad = n => String(n).padStart(2, '0');
@@ -28,7 +28,7 @@
   const display = date => `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
   const validDate = (year, month, day) => {
     const result = new Date(year, month - 1, day);
-    return year >= 1 && year <= today.getFullYear() && month >= 1 && month <= 12 &&
+    return year >= minYear && year <= today.getFullYear() && month >= 1 && month <= 12 &&
       day >= 1 && result.getFullYear() === year && result.getMonth() === month - 1 &&
       result.getDate() === day && result <= today ? result : null;
   };
@@ -176,7 +176,7 @@
     native.value = parsed ? iso(parsed) : '';
     const invalid = value !== '' && !parsed;
     if (showError) {
-      textInput.setCustomValidity(invalid ? 'Enter a valid date in DD/MM/YYYY format (not in the future).' : '');
+      textInput.setCustomValidity(invalid ? `Enter a valid date in DD/MM/YYYY format (${minYear} to today).` : '');
       textInput.classList.toggle('dob-invalid', invalid);
     } else {
       textInput.setCustomValidity('');
